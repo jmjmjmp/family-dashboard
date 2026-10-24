@@ -9,8 +9,7 @@ from zoneinfo import ZoneInfo
 from icalendar import Calendar
 import recurring_ical_events
 
-CALENDAR_ID = os.getenv('GOOGLE_CALENDAR_ID', 'family07093882205846591093@group.calendar.google.com')
-URL = 'https://calendar.google.com/calendar/ical/' + quote(CALENDAR_ID, safe='') + '/public/basic.ics'
+URL = https://calendar.google.com/calendar/embed?src=family07093882205846591093%40group.calendar.google.com&ctz=America%2FEdmonton
 with urlopen(Request(URL, headers={'User-Agent':'FamilyDashboard/1.0'}), timeout=30) as response:
     feed = response.read()
 calendar = Calendar.from_ical(feed)
