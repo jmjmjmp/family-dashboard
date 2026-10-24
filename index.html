@@ -180,24 +180,24 @@ main { max-width:none; padding:12px 16px 6px; }
 .forecast-day .forecast-icon { font-size:clamp(17px,2.4vw,25px);line-height:1.1; }
 .forecast-day .forecast-temps { font-size:clamp(11px,1.3vw,14px); }
 .forecast-day .forecast-rain { font-size:11px; }
-.dashboard-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:10px; }
+.dashboard-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0, 68fr) minmax(0, 32fr);gap:8px; }
 .dashboard-grid > .card { min-height:0;overflow:auto;padding:11px 13px;border-radius:15px; }
-.dashboard-grid h2 { font-size:clamp(16px,1.7vw,20px);margin:0 0 8px; }
+.dashboard-grid h2 { font-size:clamp(16px,1.7vw,20px);margin:0 0 5px; }
 .agenda { display:flex;flex-direction:column; }
 #family-calendar { width:100%;flex:1;min-height:0;border:0;border-radius:9px;background:white; }
-.kid-panel { padding:5px;background:transparent;border:0!important; }
+.kid-panel { padding:2px;background:transparent;border:0!important; }
 .kid-heading { display:none; }
 .kids-grid { display:block; }
 .task-grid { gap:5px; }
-.task-tile { min-height:0;padding:5px 2px;border-radius:10px; }
-.task-tile img { height:clamp(35px,6.3vh,67px);max-width:75px; }
-.task-tile span { font-size:clamp(10px,1.1vw,13px);min-height:29px; }
-.task-tile input { width:23px;height:23px;margin:2px 0; }
-.kid-card p { margin:4px 0 0;text-align:right; }
+.task-tile { min-height:0;padding:3px 2px;border-radius:10px; }
+.task-tile img { height:clamp(28px,4.6vh,48px);max-width:60px; }
+.task-tile span { font-size:clamp(10px,1.1vw,12px);min-height:26px; }
+.task-tile input { width:21px;height:21px;margin:1px 0; }
+.kid-card p { margin:2px 0 0;text-align:right;font-size:11px; }
 .ollie-card { background:#e5f0fc; }
 .leo-card { background:#f9ebdc; }
 .countdown-row { padding:5px 0; }
-.reset-button { display:block;margin:5px 0 0 auto;padding:5px 10px;min-height:30px;font-size:12px; }
+.reset-button { display:block;margin:3px 0 0 auto;padding:4px 10px;min-height:26px;font-size:12px; }
 @media (orientation:landscape) and (min-width:700px) {
   html,body { height:100%;overflow:hidden; }
   main { height:100dvh; height:100vh;display:flex;flex-direction:column; }
