@@ -64,6 +64,11 @@
   .checklist { background: var(--blue); }
   .chores { background: var(--green); }
   .countdowns { background: var(--purple); }
+  .calendar-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin: 12px 0; }
+  .calendar-actions button { font-size:14px; }
+  .day-heading { font-weight:700; margin: 14px 0 3px; color:var(--ink); }
+  .calendar-error { color:#a33333; }
+
   .item {
     display: flex;
     align-items: center;
@@ -153,11 +158,12 @@
 
   <div class="grid">
     <section class="card agenda">
-      <h2>📅 Today's agenda</h2>
-      <div id="agenda-list"></div>
-      <p class="muted small" id="agenda-note">
-        Sample events — calendar connection coming next.
-      </p>
+      <h2>📅 Family calendar · next 7 days</h2>
+      <p class="muted small">Live public family calendar · agenda view</p>
+      <iframe id="family-calendar" title="Family Google Calendar" loading="lazy"
+        src="https://calendar.google.com/calendar/embed?src=family07093882205846591093%40group.calendar.google.com&amp;ctz=America%2FEdmonton&amp;mode=AGENDA&amp;showTitle=0&amp;showNav=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0"
+        style="width:100%;height:440px;border:0;border-radius:12px;background:white"
+        referrerpolicy="no-referrer-when-downgrade"></iframe>
     </section>
 
     <section class="card checklist">
@@ -199,12 +205,8 @@ const choreItems = [
   "Tidy my toys"
 ];
 
-// Replace these sample events with real calendar data later.
-const sampleEvents = [
-  { time: "9:00 AM", title: "School" },
-  { time: "3:30 PM", title: "After-school activity" },
-  { time: "6:00 PM", title: "Family dinner" }
-];
+// Google Calendar is embedded directly above. No OAuth credentials needed.
+// Calendar must be publicly visible in Google Calendar settings.
 
 // Use YYYY-MM-DD for each special date.
 const specialDates = [
@@ -269,26 +271,6 @@ function updateProgress() {
   const count = choreItems.filter((_, i) => !!done[i]).length;
   document.getElementById("chore-progress").textContent =
     count + " of " + choreItems.length + " chores completed";
-}
-
-function renderAgenda() {
-  const container = document.getElementById("agenda-list");
-  container.innerHTML = "";
-
-  sampleEvents.forEach(event => {
-    const row = document.createElement("div");
-    row.className = "event item";
-
-    const time = document.createElement("div");
-    time.className = "event-time";
-    time.textContent = event.time;
-
-    const title = document.createElement("div");
-    title.textContent = event.title;
-
-    row.append(time, title);
-    container.appendChild(row);
-  });
 }
 
 function renderCountdowns() {
@@ -417,7 +399,6 @@ function weatherEmoji(code) {
 function renderAll() {
   renderChecks("checklist", checklistItems);
   renderChecks("chores", choreItems);
-  renderAgenda();
   renderCountdowns();
   updateProgress();
   updateClock();
@@ -427,6 +408,9 @@ renderAll();
 loadWeather();
 setInterval(updateClock, 30000);
 setInterval(loadWeather, 30 * 60 * 1000);
+// A midnight refresh keeps the displayed date range current.
+setInterval(function() { renderCountdowns(); }, 60 * 60 * 1000);
 </script>
+
 </body>
 </html>
