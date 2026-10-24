@@ -138,71 +138,134 @@
     .card { padding: 14px; }
     .weather { min-width: 115px; padding: 10px; }
   }
+
+  .chores { grid-column: 1 / -1; }
+  .forecast { background:#e7f0f5; margin-bottom:14px; padding:14px 18px; }
+  .forecast h2 { margin:0 0 10px; font-size:19px; }
+  .forecast-days { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px; }
+  .forecast-day { background:#ffffffb8;border-radius:12px;text-align:center;padding:10px 4px;min-width:0; }
+  .forecast-day .forecast-icon { font-size:30px;line-height:1.3; }
+  .forecast-day .forecast-temps { font-weight:700;font-size:16px;white-space:nowrap; }
+  .forecast-day .forecast-low { color:var(--muted); }
+  .forecast-day .forecast-rain { color:#286b93;font-size:13px; }
+  @media(max-width:600px) { .forecast {padding:10px;} .forecast-days {gap:4px;} .forecast-day {padding:8px 2px;} .forecast-day .forecast-icon {font-size:23px;} .forecast-day .forecast-temps {font-size:13px;} .forecast-day .forecast-rain {font-size:11px;} }
+  .kids-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+  .kid-panel { background:rgba(255,255,255,.75);border-radius:18px;padding:14px; }
+  .kid-panel.ollie { border-top:7px solid #8ac1ed; }
+  .kid-panel.leo { border-top:7px solid #ffc88c; }
+  .kid-heading { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
+  .kid-heading h3 { margin:0;font-size:25px; }
+  .task-grid { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px; }
+  .task-tile { background:white;border:2px solid transparent;border-radius:14px;min-height:166px;padding:9px 4px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;cursor:pointer;user-select:none; }
+  .task-tile img { width:100%;max-width:86px;height:85px;object-fit:contain; }
+  .task-tile span { font-size:13px;line-height:1.2;font-weight:650;min-height:32px; }
+  .task-tile input { width:27px;height:27px;accent-color:#40825c; }
+  .task-tile.completed { border-color:#6eae7b;background:#edf8ed; }
+  .task-tile.completed span { text-decoration:line-through;opacity:.65; }
+  .task-tile.disabled { opacity:.4;cursor:default; }
+  .chores-foot { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap; }
+  @media(max-width:650px) { .kids-grid {grid-template-columns:1fr;} .task-tile {min-height:145px;} }
+  @media(max-width:420px) { .task-grid {gap:4px;} .task-tile {padding:6px 2px;min-height:130px;} .task-tile img {height:60px;} .task-tile span {font-size:11px;} }
+
+/* Compact landscape dashboard: forecast shares the header with date/time. */
+html, body { min-height:100%; }
+main { max-width:none; padding:12px 16px 6px; }
+.topbar { display:grid; grid-template-columns:minmax(180px, 25%) minmax(0,1fr); gap:14px; align-items:center; margin-bottom:10px; }
+.family-heading h1 { font-size:clamp(22px,2.8vw,34px);margin-bottom:3px; }
+.family-heading p { margin:2px 0;font-size:clamp(13px,1.4vw,17px); }
+.forecast { margin:0; padding:8px 10px; border-radius:15px; background:#e7f0f5; }
+.forecast-label { font-weight:700;font-size:13px;margin-bottom:4px; }
+.forecast-days { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px; }
+.forecast-day { padding:4px 2px; border-radius:9px; }
+.forecast-day .forecast-icon { font-size:clamp(17px,2.4vw,25px);line-height:1.1; }
+.forecast-day .forecast-temps { font-size:clamp(11px,1.3vw,14px); }
+.forecast-day .forecast-rain { font-size:11px; }
+.dashboard-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:10px; }
+.dashboard-grid > .card { min-height:0;overflow:auto;padding:11px 13px;border-radius:15px; }
+.dashboard-grid h2 { font-size:clamp(16px,1.7vw,20px);margin:0 0 8px; }
+.agenda { display:flex;flex-direction:column; }
+#family-calendar { width:100%;flex:1;min-height:0;border:0;border-radius:9px;background:white; }
+.kid-panel { padding:5px;background:transparent;border:0!important; }
+.kid-heading { display:none; }
+.kids-grid { display:block; }
+.task-grid { gap:5px; }
+.task-tile { min-height:0;padding:5px 2px;border-radius:10px; }
+.task-tile img { height:clamp(35px,6.3vh,67px);max-width:75px; }
+.task-tile span { font-size:clamp(10px,1.1vw,13px);min-height:29px; }
+.task-tile input { width:23px;height:23px;margin:2px 0; }
+.kid-card p { margin:4px 0 0;text-align:right; }
+.ollie-card { background:#e5f0fc; }
+.leo-card { background:#f9ebdc; }
+.countdown-row { padding:5px 0; }
+.reset-button { display:block;margin:5px 0 0 auto;padding:5px 10px;min-height:30px;font-size:12px; }
+@media (orientation:landscape) and (min-width:700px) {
+  html,body { height:100%;overflow:hidden; }
+  main { height:100dvh; height:100vh;display:flex;flex-direction:column; }
+  .topbar { flex:0 0 auto; }
+  .dashboard-grid { flex:1;min-height:0; }
+}
+@media (max-width:699px), (orientation:portrait) {
+  .topbar { grid-template-columns:1fr; }
+  .dashboard-grid { grid-template-columns:1fr;grid-template-rows:auto; }
+  .dashboard-grid > .card { min-height:240px; }
+  #family-calendar { min-height:300px; }
+}
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <div>
+  <header class="topbar">
+    <div class="family-heading">
       <h1>Our Family 🏡</h1>
       <p id="today" class="muted">Family HQ</p>
       <p id="clock" class="muted"></p>
     </div>
-    <div class="weather">
-      <div id="weather-icon">🌤️</div>
-      <div id="temperature" class="temperature">--°</div>
-      <div id="conditions">Loading weather…</div>
-      <div id="highlow" class="small"></div>
-    </div>
+    <section class="forecast" aria-label="Five-day Calgary weather forecast">
+      <div class="forecast-label">🌦️ Calgary · 5 days</div>
+      <div id="forecast-days" class="forecast-days"><p class="muted small">Loading forecast…</p></div>
+    </section>
   </header>
 
-  <div class="grid">
+  <div class="dashboard-grid">
     <section class="card agenda">
-      <h2>📅 Family calendar · next 7 days</h2>
-      <p class="muted small">Live public family calendar · agenda view</p>
-      <iframe id="family-calendar" title="Family Google Calendar" loading="lazy"
+      <h2>📅 Family calendar</h2>
+      <iframe id="family-calendar" title="Family Google Calendar" loading="eager"
         src="https://calendar.google.com/calendar/embed?src=family07093882205846591093%40group.calendar.google.com&amp;ctz=America%2FEdmonton&amp;mode=AGENDA&amp;showTitle=0&amp;showNav=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0"
-        style="width:100%;height:440px;border:0;border-radius:12px;background:white"
         referrerpolicy="no-referrer-when-downgrade"></iframe>
     </section>
-
-    <section class="card checklist">
-      <h2>☀️ My checklist</h2>
-      <div id="checklist-list"></div>
-      <button onclick="resetList('checklist')">
-        Reset checklist
-      </button>
-    </section>
-
-    <section class="card chores">
-      <h2>⭐ Family chores</h2>
-      <div id="chores-list"></div>
-      <p id="chore-progress" class="small"></p>
-      <button onclick="resetList('chores')">Reset chores</button>
-    </section>
-
     <section class="card countdowns">
       <h2>🎉 Coming up</h2>
       <div id="countdown-list"></div>
-      <p class="muted small">
-        Edit the dates in the JavaScript to personalize these.
-      </p>
+    </section>
+    <section class="card chores kid-card ollie-card">
+      <h2>⭐ Ollie's chores</h2>
+      <div id="ollie-chores"></div>
+      <p id="ollie-progress" class="small"></p>
+    </section>
+    <section class="card chores kid-card leo-card">
+      <h2>⭐ Léo's chores</h2>
+      <div id="leo-chores"></div>
+      <p id="leo-progress" class="small"></p>
     </section>
   </div>
+  <button class="reset-button" onclick="resetTodaysChores()">Reset today's chores</button>
 </main>
 
 <script>
-const checklistItems = [
-  "Get dressed",
-  "Brush teeth",
-  "Eat breakfast",
-  "Pack school bag"
+const chorePictures = [
+  'data:image/webp;base64,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',
+  'data:image/webp;base64,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',
+  'data:image/webp;base64,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',
+  'data:image/webp;base64,UklGRkoIAABXRUJQVlA4ID4IAAAwIgCdASpoAGsAPl0okEUjoqGW2k1sOAXEsQBogwC/INgD8B5tFcfzO98mn7W5yXmAc6DzDfrl+1Xuxf4P/de0HzgOpT9BH9s+tj/d6hobe8u8lv/UcU+wzwA4APqNxMdtR+WPOEzI/7h6Iv0d6P/pT9kfgP/WX/hHgJMG1dHHIFkKATfGjh4D/94mNNJnIGc4WxD0NJsHCLMOC9Gux9gGqJ+VpRfCZPP9YkbqAgmo9QCiYz7bRtcIQ3OMvM+TmTDsX9NK+Dg3hpCF8UfTNgB/N15WmPYn6kS/CZw1LQ82t1STsBAYO8KOHH2uGiXZfCz3gWucnvqcPQXs2saKVyEK0XCGQdSCW4MCsxokioY1mCmO4mTjHdUUS4AA/v1nnjTtrbA8X1GRxxKLv47FH6U6UaaSXSRjYRPnmsL53r8nZRHfvjt//Q5PudfikL0Mtj/rGgZeB+DeYuIHz89aaNPhOzE/kB/SDsOFA7lZx828ShBrvLohyiMLUe1Gu6HBnGD6O49UGntPieVA2rTRM7+4zsl+7/ufhYDSi0p9FLDYQIkmhIErliQnVrkNQAJndhkQ/C75Ovgy1/d5Q17xKdWUxx63VW3QPxf5O08215SDV9+pJm6OFHN29LarzTiITo1ZB5F9m/cik7j9kqmlHm+PfbIJXtBYovPD3TfaaZt0U/mTT431efHSztVWyvUnjhBD7LgCuU+QXbKNacO8qYPHTkBlpcbXqpMhWgak/z+YqLMYR+eWZl/YmX/Tnm9LRa6wy7oduoSapzNpvstRS+x7vzG/42wIhy0M6ZiIAsogNlzeynEydBUeDqZTGLc/0f0utTs4Drj0RbE2jpriR/wx+7yYSnOilGB9FsN6Wm8Jgcsf4LyIUkCccly6W5f4eh5dlRED7FXzPw+mUkZu9lq+GreLnDvEtAF6Z2tf3o6XsDeunqDi8/EzyMJ7q7B5CDWE4N7hcBCEJi1fZkbG/jh348CWv0VALZgmUkp37jOiPB3+wBSRYq+rJLgeiQCLzP8PzmUM7iixNb5Tqv3ZxQrNMR850z8bTo8fnDtpOJrt6yKwsa4zGq+45k9FgrIHVEVEafF3TZ54XVY4mht2wpn6tqrO225hT/6xsdiBHg+LMAuYJrUlU02V98xmHfYQy4IdijTp9FWXfOud/b+K9np/YGD7bi5n+1YI0nSscR/n715NnuO0iUbm8/9oxF7yL72l9dGht/GRcDnfHbGf3YBAUaC8hFJI8g0YCOJQYwIarqAOgb7vpu5+evnkntCYWByXdHj+TZ70/6LZgXPE3+qWl2m9TVH+G5mF1Q9aRuRq7OVNdYS3gJAxzEnK1u/S/QuG5bi9JHyWYdGvF3DYuf96jfLMK8wYI5PLQClpHvX0/8pm0f8Jff+SzNkPO/+RspALlk4MWUwBr2GaRdjMd+h+9SPJVw8lGiyPgTFP0XDaSXaU1Bk0jM2jxw5iYLRGeSZzq30Z+H7uXRgfYx7jJ7IW8/BCt5rxmPsdeYXtoI8ym46fjHKN4PS0bxaX9lOpn8L4b/XiVDXp91396q6neBuySe+vkRIzOlH9ij1FV/xPt8cJPTM4S/s2OAvPPJRFjfzc6Dpzl/wYylj2hjzB4bsOlO5xyouOFSck/twNHDM90QEx/clvctJFbK+ZS3My30JfAO3hw/5WnzUfvWn0k4qae22wSv4qX7t+RdXnUuScaUFdgreZlL9PTho82hXNuSmT+35r5BtuwnMqT8fxPyc/JmeLZiYo2kG7TLNYnrKcyt4Db/pf8SqQIm5nVBfx/eJFM/oSD4ENMsTJ1uDIfVX5yWgmZAVAboYpyA5dcXfUq+0GwMW/uUW5nQW7R+RWk7TzdEt4YtV/KKT1im5w/8PLIEn2vs1xWmv/1+JjiWVdcceU+uhGAU5S/XIFU8V/eVhXcNDxNlAcK+jz/FfazyG99U/LctTzDoRGAgEGIvtZYw5YyZQiE6yCHns485VQOUwteie6rsnT7OFld04ZzmVMytjDWooi+vnI/kZaz8QSNMrTx6vdTXltYiCVCYmxX1lyx4/SEvifORsh0kG8bWHd3R0iXpIGErs4sZS5AvMELPOmAos/3mbob3VmZk+K5eo1OlfvU851g8sMBjZMMlCuc9J4QfPBqGq4D1F0TmohIIsEZMm+bkYYScgfFClQF25m6klL28o4ixCqig+OuPbKy2RysCINcxuDPUizYrYX7GPP6Kf1zfJJsRutg4Tn7e9BBlPL8IPMn/+o5IKZgyi/CUXdh0dbnikOxD3FfRkDBhsRwtYreY4U+NabN9B8uhpBn2LSH4qWxZCidEvN+rSWkky03PrlF6Qr2FXskyUjVVMSoGlFsdhxtB4DY9b+BBFvLjBPRXbrqItujQJfdflGZg9BFg1jFXZZlGVGUOXF0MhzA5IqMU1Ct2m9yEXMDJggrgr4at7x5xMP9Esi3/911pN83c39AVaslCNV7hm6o7i6soP+kUF8hDLR/nfg+Vz+yaEqn+JimUpl34/gmKJ98ySSS5OGztrWGe6y7+RZicmTX5bGj5x5TsfPZTv6IvDA5xORcyUVpTHJ49Q8Vwm5hAmyDTqfFJD3Fnkn8WXG4SfavK+VgvNZ4+7iakzi25JVXQ4C1Qq19/QgG0r7cY9KOY+dNbh5YaZTkR8V6LpvIZPNB8Y/s6JWMUkAPgGNJeop5GmhE/sKVMqorNZdMI9bOYVn8omxd1H6ouJjkwPqJ6KOGNiE/uCtfyjAhCc+lKQFahk6Ov9/gMz+sOu8tu+T+xeKGv4rjJIYFvKDYwzmdJ1U9/+03arpnYZgAAAA',
+  'data:image/webp;base64,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'
 ];
 
-const choreItems = [
-  "Make my bed",
-  "Feed the pet",
-  "Tidy my toys"
+const choreTasks = [
+  { id: "bed", title: "Make bed", image: chorePictures[0] },
+  { id: "dress", title: "Get dressed", image: chorePictures[1] },
+  { id: "am-teeth", title: "Brush teeth (morning)", image: chorePictures[2] },
+  { id: "bag", title: "Unload school bag", image: chorePictures[3], weekdaysOnly: true },
+  { id: "pm-teeth", title: "Brush teeth (bedtime)", image: chorePictures[4] }
 ];
 
 // Google Calendar is embedded directly above. No OAuth credentials needed.
@@ -233,47 +296,50 @@ function save(key, value) {
   } catch (_) {}
 }
 
-function renderChecks(id, items) {
-  const saved = getSaved(id, {});
-  const container = document.getElementById(id + "-list");
-  container.innerHTML = "";
-
-  items.forEach((label, index) => {
-    const row = document.createElement("label");
-    row.className = "item";
-
-    const check = document.createElement("input");
-    check.type = "checkbox";
-    check.checked = !!saved[index];
-
-    const text = document.createElement("span");
-    text.textContent = label;
-    if (check.checked) text.className = "done";
-
-    check.addEventListener("change", () => {
-      const next = getSaved(id, {});
-      next[index] = check.checked;
-      save(id, next);
-      renderChecks(id, items);
-      updateProgress();
+function localDayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function choresStorageKey() { return "family-chores-v2-" + localDayKey(); }
+function isWeekday() { const day = new Date().getDay(); return day >= 1 && day <= 5; }
+function renderKidsChores() {
+  const state = getSaved(choresStorageKey(), {});
+  let total = 0, done = 0;
+  [{id:"ollie",name:"Ollie",cls:"ollie"},{id:"leo",name:"Léo",cls:"leo"}].forEach(kid => {
+    const root = document.getElementById(kid.id + "-chores");
+    root.innerHTML = "";
+    const panel = document.createElement("section");
+    panel.className = "kid-panel " + kid.cls;
+    const heading = document.createElement("div"); heading.className = "kid-heading";
+    const name = document.createElement("h3"); name.textContent = kid.name;
+    const score = document.createElement("strong");
+    heading.append(name,score);panel.appendChild(heading);
+    const grid = document.createElement("div"); grid.className = "task-grid";
+    let kidTotal=0,kidDone=0;
+    choreTasks.forEach(task => {
+      const enabled = !task.weekdaysOnly || isWeekday();
+      const key = kid.id + ":" + task.id;
+      const checked = !!state[key] && enabled;
+      const tile = document.createElement("label");
+      tile.className = "task-tile" + (checked ? " completed" : "") + (!enabled ? " disabled" : "");
+      const pic = document.createElement("img");pic.src = task.image;pic.alt = task.title;
+      const label = document.createElement("span");label.textContent = task.title;
+      const check = document.createElement("input");check.type="checkbox";check.checked=checked;check.disabled=!enabled;
+      check.setAttribute("aria-label",kid.name+": "+task.title);
+      check.addEventListener("change",()=>{
+        const updated=getSaved(choresStorageKey(),{});updated[key]=check.checked;
+        save(choresStorageKey(),updated);renderKidsChores();
+      });
+      tile.append(pic,label,check);grid.appendChild(tile);
+      if(enabled){total++;kidTotal++;if(checked){done++;kidDone++;}}
     });
-
-    row.append(check, text);
-    container.appendChild(row);
+    score.textContent=kidDone+" / "+kidTotal+" done";
+    panel.appendChild(grid);root.appendChild(panel);
+    document.getElementById(kid.id + "-progress").textContent = kidDone + " of " + kidTotal + " done";
   });
-}
 
-function resetList(id) {
-  save(id, {});
-  renderAll();
 }
-
-function updateProgress() {
-  const done = getSaved("chores", {});
-  const count = choreItems.filter((_, i) => !!done[i]).length;
-  document.getElementById("chore-progress").textContent =
-    count + " of " + choreItems.length + " chores completed";
-}
+function resetTodaysChores() { save(choresStorageKey(),{});renderKidsChores(); }
 
 function renderCountdowns() {
   const container = document.getElementById("countdown-list");
@@ -283,14 +349,25 @@ function renderCountdowns() {
     now.getFullYear(), now.getMonth(), now.getDate()
   );
 
-  specialDates.forEach(item => {
+  const upcoming = specialDates.map(item => {
     const parts = item.date.split("-").map(Number);
-    // Count down to the next occurrence every year, including future years.
+    // Repeat annually, and always use the next upcoming occurrence.
     let target = Date.UTC(now.getFullYear(), parts[1] - 1, parts[2]);
     if (target < today) {
       target = Date.UTC(now.getFullYear() + 1, parts[1] - 1, parts[2]);
     }
-    const days = Math.round((target - today) / 86400000);
+    return { item, days: Math.round((target - today) / 86400000) };
+  }).filter(event => event.days <= 90)
+    .sort((a, b) => a.days - b.days || a.item.title.localeCompare(b.item.title));
+
+  if (upcoming.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "Nothing coming up in the next 90 days 🎉";
+    container.appendChild(empty);
+  }
+
+  upcoming.forEach(({ item, days }) => {
 
     const row = document.createElement("div");
     row.className = "countdown-row";
@@ -347,27 +424,50 @@ async function loadWeather() {
       + "?latitude=" + latitude
       + "&longitude=" + longitude
       + "&current=temperature_2m,weather_code"
-      + "&daily=temperature_2m_max,temperature_2m_min"
-      + "&timezone=auto&forecast_days=1";
+      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
+      + "&timezone=America%2FEdmonton&forecast_days=5";
 
     const response = await fetch(url);
     if (!response.ok) throw new Error("Weather unavailable");
     const data = await response.json();
 
-    document.getElementById("temperature").textContent =
-      Math.round(data.current.temperature_2m) + "°";
-    document.getElementById("conditions").textContent =
-      weatherDescription(data.current.weather_code);
-    document.getElementById("highlow").textContent =
-      "High " + Math.round(data.daily.temperature_2m_max[0])
-      + "° · Low "
-      + Math.round(data.daily.temperature_2m_min[0]) + "°";
-    document.getElementById("weather-icon").textContent =
-      weatherEmoji(data.current.weather_code);
+    renderForecast(data.daily);
   } catch (_) {
-    document.getElementById("conditions").textContent =
-      "Weather unavailable";
+    document.getElementById("forecast-days").textContent =
+      "Forecast unavailable — check your internet connection.";
   }
+}
+
+function renderForecast(daily) {
+  const root = document.getElementById("forecast-days");
+  root.innerHTML = "";
+  if (!daily || !daily.time || !daily.time.length) {
+    root.textContent = "Forecast unavailable";
+    return;
+  }
+  daily.time.slice(0, 5).forEach((dateString, i) => {
+    const day = document.createElement("div");
+    day.className = "forecast-day";
+    const name = document.createElement("div");
+    name.className = "small";
+    name.style.fontWeight = "700";
+    // Noon avoids date rollover from UTC offsets on older iPads.
+    name.textContent = i === 0 ? "Today" :
+      new Date(dateString + "T12:00:00").toLocaleDateString("en-CA", { weekday:"short" });
+    const icon = document.createElement("div");
+    icon.className = "forecast-icon";
+    icon.textContent = weatherEmoji(daily.weather_code[i]);
+    const temps = document.createElement("div");
+    temps.className = "forecast-temps";
+    temps.textContent = Math.round(daily.temperature_2m_max[i]) + "° / " +
+      Math.round(daily.temperature_2m_min[i]) + "°";
+    const rain = document.createElement("div");
+    rain.className = "forecast-rain";
+    const chance = daily.precipitation_probability_max && daily.precipitation_probability_max[i];
+    rain.textContent = Number.isFinite(chance) ? "💧 " + Math.round(chance) + "%" : " ";
+    day.appendChild(name); day.appendChild(icon); day.appendChild(temps); day.appendChild(rain);
+    root.appendChild(day);
+  });
 }
 
 function weatherDescription(code) {
@@ -395,10 +495,8 @@ function weatherEmoji(code) {
 }
 
 function renderAll() {
-  renderChecks("checklist", checklistItems);
-  renderChecks("chores", choreItems);
+  renderKidsChores();
   renderCountdowns();
-  updateProgress();
   updateClock();
 }
 
@@ -407,7 +505,7 @@ loadWeather();
 setInterval(updateClock, 30000);
 setInterval(loadWeather, 30 * 60 * 1000);
 // A midnight refresh keeps the displayed date range current.
-setInterval(function() { renderCountdowns(); }, 60 * 60 * 1000);
+setInterval(function() { renderCountdowns(); renderKidsChores(); }, 60 * 1000);
 </script>
 
 </body>
