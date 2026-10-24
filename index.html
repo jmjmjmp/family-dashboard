@@ -211,7 +211,9 @@ const choreItems = [
 // Use YYYY-MM-DD for each special date.
 const specialDates = [
   { title: "Halloween", date: "2026-10-31", picture: "🎃" },
-  { title: "Christmas", date: "2026-12-25", picture: "🎄" }
+  { title: "Christmas", date: "2026-12-25", picture: "🎄" },
+  { title: "Léo’s Birthday", date: "2026-11-11", picture: "🎂" },
+  { title: "Ollie’s Birthday", date: "2027-04-04", picture: "🎈" }
   // Add more: { title: "Birthday", date: "2027-03-15", picture: "🎂" },
   // Or use a local image: { title: "Vacation", date: "2027-07-01", image: "images/beach.png" }
 ];
@@ -283,16 +285,12 @@ function renderCountdowns() {
 
   specialDates.forEach(item => {
     const parts = item.date.split("-").map(Number);
-    const target = Date.UTC(parts[0], parts[1] - 1, parts[2]);
-    let days = Math.ceil((target - today) / 86400000);
-
-    // Past dates count down to the next annual occurrence.
-    if (days < 0) {
-      const next = new Date(parts[0] + 1, parts[1] - 1, parts[2]);
-      days = Math.ceil((Date.UTC(
-        next.getFullYear(), next.getMonth(), next.getDate()
-      ) - today) / 86400000);
+    // Count down to the next occurrence every year, including future years.
+    let target = Date.UTC(now.getFullYear(), parts[1] - 1, parts[2]);
+    if (target < today) {
+      target = Date.UTC(now.getFullYear() + 1, parts[1] - 1, parts[2]);
     }
+    const days = Math.round((target - today) / 86400000);
 
     const row = document.createElement("div");
     row.className = "countdown-row";
