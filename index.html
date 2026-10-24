@@ -210,18 +210,71 @@ main { max-width:none; padding:12px 16px 6px; }
   .dashboard-grid > .card { min-height:240px; }
   #family-calendar { min-height:300px; }
 }
+
+/* Pokémon-inspired, no-scroll landscape redesign */
+:root {--ink:#102b47;--muted:#425a70;--paper:#d8f1f5;--green:#dcf3dc;--blue:#e0f3ff;--purple:#fff3ce;}
+html,body {margin:0;width:100%;height:100%;overflow:hidden;}
+body {background:linear-gradient(145deg,#83d6fc 0%,#d7f7ff 28%,#a2dfb0 72%,#4ca774 100%);}
+body:before {content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background:radial-gradient(circle at 8% 90%,#24773b 0 8%,transparent 9%),radial-gradient(circle at 92% 80%,#2b944f 0 12%,transparent 13%);}
+main {position:relative;max-width:none;width:100%;height:100vh;height:100dvh;overflow:hidden;padding:clamp(5px,1vh,10px);display:flex;flex-direction:column;gap:clamp(4px,.8vh,8px);}
+.topbar {display:grid;grid-template-columns:minmax(165px,29%) minmax(0,1fr);gap:8px;margin:0;min-height:0;flex:0 0 auto;max-height:24%;align-items:stretch;}
+.family-heading {background:linear-gradient(100deg,#c6ecffdd,#e9faffdd);border:2px solid #2779b0;border-radius:13px;padding:5px 70px 5px 10px;position:relative;overflow:hidden;min-height:70px;}
+.family-heading:after {content:"";position:absolute;right:0;bottom:0;width:clamp(55px,10vw,112px);height:100%;background:url('gengar.png') right bottom/contain no-repeat;}
+.family-heading h1 {font-size:clamp(18px,2.5vw,32px);line-height:1.05;color:#f6cc26;-webkit-text-stroke:.65px #173e77;text-shadow:1px 2px #174f8b;margin:0 0 2px;white-space:nowrap;}
+.family-heading p {font-size:clamp(11px,1.45vw,17px);line-height:1.1;margin:1px 0;}
+.pokeball {color:#df4040;-webkit-text-stroke:1px #183b67;}
+.forecast {padding:4px 8px;border:2px solid #2b80a6;border-radius:13px;background:#e2f5ffea;min-height:0;}
+.forecast-label {font-size:clamp(10px,1.4vw,15px);margin:0 0 2px;line-height:1;}
+#current-temp {font-size:clamp(16px,2.6vw,29px);color:#126b9e;}
+.forecast-days {gap:3px;}
+.forecast-day {padding:2px 1px;background:#fff9;border-radius:8px;}
+.forecast-day .small {font-size:clamp(9px,1.15vw,13px)!important;line-height:1;}
+.forecast-day .forecast-icon {font-size:clamp(14px,2.4vw,26px);line-height:1;}
+.forecast-day .forecast-temps {font-size:clamp(9px,1.25vw,14px);line-height:1.1;}
+.forecast-day .forecast-rain {font-size:clamp(9px,1.1vw,12px);line-height:1.1;}
+.dashboard-grid {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,64fr) minmax(0,36fr);gap:clamp(4px,.7vh,8px);flex:1;min-height:0;}
+.dashboard-grid > .card {min-height:0;overflow:hidden;padding:clamp(5px,.8vh,10px);border:2px solid #2576a4;border-radius:13px;box-shadow:0 2px 4px #154b6433;}
+.dashboard-grid h2 {font-size:clamp(14px,2vw,21px);margin:0 0 3px;line-height:1.1;}
+.agenda {background:#e7f6ffed;display:flex;flex-direction:column;}
+.countdowns {background:#fff4d8f2;}
+#family-calendar {display:flex;flex-direction:column;min-height:0;flex:1;overflow:hidden;gap:2px;background:transparent;}
+.calendar-event {display:flex;align-items:center;gap:7px;background:#fff9;border-radius:8px;padding:clamp(2px,.6vh,7px) 7px;min-height:0;flex:1;}
+.calendar-event-icon {font-size:clamp(20px,3.1vh,34px);line-height:1;flex:0 0 38px;text-align:center;}
+.calendar-event-detail {min-width:0;display:flex;align-items:center;gap:8px;flex:1;}
+.calendar-event-detail strong {font-size:clamp(12px,1.55vw,18px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.calendar-when {font-size:clamp(10px,1.15vw,14px);color:#365d78;white-space:nowrap;}
+.countdown-row {padding:clamp(2px,.45vh,6px) 0;gap:6px;}
+.countdown-picture {width:clamp(32px,5.2vh,55px)!important;height:clamp(32px,5.2vh,55px)!important;font-size:clamp(24px,4vh,40px)!important;}
+.countdown-name {font-size:clamp(12px,1.7vw,18px)!important;}
+.countdown-days {font-size:clamp(13px,1.8vw,20px)!important;margin-top:1px!important;}
+.kid-card {padding:4px 6px!important;}
+.ollie-card {background:#d9f0ffed;}.leo-card {background:#ffe6c9ed;}
+.task-grid {gap:clamp(2px,.5vw,6px);}
+.task-tile {padding:2px 1px;border-radius:7px;}
+.task-tile img {height:clamp(20px,4.2vh,42px);max-width:95%;}
+.task-tile span {font-size:clamp(9px,1.05vw,12px);line-height:1.08;min-height:0;}
+.task-tile input {width:clamp(16px,2.5vh,23px);height:clamp(16px,2.5vh,23px);margin:0;}
+.kid-card p {font-size:clamp(9px,1.1vw,12px);margin:1px 0;}
+.reset-button {flex:0 0 auto;margin:0 0 0 auto;padding:2px 8px;min-height:22px;font-size:11px;}
+@media (max-height:650px) and (orientation:landscape) {
+ .topbar {max-height:21%;} .dashboard-grid {grid-template-rows:minmax(0,65fr) minmax(0,35fr);}
+ .calendar-event:nth-child(n+6) {display:none;}
+ .countdown-row:nth-child(n+5) {display:none;}
+}
+@media (orientation:portrait) {html,body{overflow:auto;}main{height:auto;min-height:100vh;overflow:visible}.topbar{grid-template-columns:1fr;max-height:none}.dashboard-grid{grid-template-columns:1fr;grid-template-rows:auto}.dashboard-grid>.card{min-height:170px}.task-tile img{height:45px}}
+
 </style>
 </head>
 <body>
 <main>
   <header class="topbar">
     <div class="family-heading">
-      <h1>Our Family 🏡</h1>
+      <h1>⚡ Our Family <span class="pokeball">◉</span></h1>
       <p id="today" class="muted">Family HQ</p>
       <p id="clock" class="muted"></p>
     </div>
     <section class="forecast" aria-label="Five-day Calgary weather forecast">
-      <div class="forecast-label">🌦️ Calgary · 5 days</div>
+      <div class="forecast-label">🌤️ Calgary <strong id="current-temp">--°</strong> · 5-day forecast</div>
       <div id="forecast-days" class="forecast-days"><p class="muted small">Loading forecast…</p></div>
     </section>
   </header>
@@ -229,9 +282,7 @@ main { max-width:none; padding:12px 16px 6px; }
   <div class="dashboard-grid">
     <section class="card agenda">
       <h2>📅 Family calendar</h2>
-      <iframe id="family-calendar" title="Family Google Calendar" loading="eager"
-        src="https://calendar.google.com/calendar/embed?src=family07093882205846591093%40group.calendar.google.com&amp;ctz=America%2FEdmonton&amp;mode=AGENDA&amp;showTitle=0&amp;showNav=1&amp;showPrint=0&amp;showTabs=0&amp;showCalendars=0"
-        referrerpolicy="no-referrer-when-downgrade"></iframe>
+<div id="family-calendar" role="region" aria-label="Upcoming family events"><p class="muted">Loading calendar…</p></div>
     </section>
     <section class="card countdowns">
       <h2>🎉 Coming up</h2>
@@ -432,6 +483,7 @@ async function loadWeather() {
     const data = await response.json();
 
     renderForecast(data.daily);
+    document.getElementById("current-temp").textContent = Math.round(data.current.temperature_2m) + "°";
   } catch (_) {
     document.getElementById("forecast-days").textContent =
       "Forecast unavailable — check your internet connection.";
@@ -500,8 +552,59 @@ function renderAll() {
   updateClock();
 }
 
+
+// Events are synchronized from the public Google Calendar by GitHub Actions.
+// This avoids Google's iframe cookie banner on older iPads.
+function eventPicture(title) {
+  const t = title.toLowerCase();
+  if (/birthday|party|anniversaire/.test(t)) return "🎂";
+  if (/school|class|teacher|école/.test(t)) return "🚌";
+  if (/hockey/.test(t)) return "🏒";
+  if (/soccer|football/.test(t)) return "⚽";
+  if (/swim|pool/.test(t)) return "🏊";
+  if (/squash|tennis/.test(t)) return "🎾";
+  if (/dentist|doctor|appointment/.test(t)) return "🩺";
+  if (/trip|flight|vacation|travel/.test(t)) return "✈️";
+  if (/camp/.test(t)) return "🏕️";
+  if (/dinner|restaurant|lunch/.test(t)) return "🍽️";
+  if (/christmas/.test(t)) return "🎄";
+  if (/halloween/.test(t)) return "🎃";
+  return "⭐";
+}
+function renderCalendarEvents(events) {
+  const root = document.getElementById("family-calendar");
+  root.innerHTML = "";
+  const now = new Date();
+  const upcoming = events.filter(e => e.end ? new Date(e.end) >= now : new Date(e.start) >= now)
+    .sort((a,b) => new Date(a.start)-new Date(b.start)).slice(0,7);
+  if (!upcoming.length) { root.textContent = "No upcoming events ✨"; return; }
+  upcoming.forEach(e => {
+    const row = document.createElement("div"); row.className = "calendar-event";
+    const icon = document.createElement("span"); icon.className="calendar-event-icon"; icon.textContent=eventPicture(e.title);
+    const detail=document.createElement("div"); detail.className="calendar-event-detail";
+    const name=document.createElement("strong"); name.textContent=e.title;
+    const when=document.createElement("span"); when.className="calendar-when";
+    const start=new Date(e.start);
+    const day=start.toLocaleDateString("en-CA",{weekday:"short",month:"short",day:"numeric",timeZone:"America/Edmonton"});
+    const time=e.all_day ? "All day" : start.toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit",timeZone:"America/Edmonton"});
+    when.textContent=day+" · "+time;
+    detail.appendChild(name);detail.appendChild(when);
+    row.appendChild(icon);row.appendChild(detail);root.appendChild(row);
+  });
+}
+async function loadCalendar() {
+  try {
+    const response=await fetch("calendar-events.json?refresh="+Math.floor(Date.now()/300000),{cache:"no-store"});
+    if(!response.ok) throw new Error("Not synchronized yet");
+    const data=await response.json();renderCalendarEvents(data.events || []);
+  } catch(e) {
+    document.getElementById("family-calendar").textContent="Calendar setup needed — enable the included GitHub Action.";
+  }
+}
 renderAll();
 loadWeather();
+loadCalendar();
+setInterval(loadCalendar, 5 * 60 * 1000);
 setInterval(updateClock, 30000);
 setInterval(loadWeather, 30 * 60 * 1000);
 // A midnight refresh keeps the displayed date range current.
