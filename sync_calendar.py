@@ -10,9 +10,19 @@ from icalendar import Calendar
 import recurring_ical_events
 
 URL = "https://calendar.google.com/calendar/ical/family07093882205846591093%40group.calendar.google.com/public/basic.ics"
-with urlopen(Request(URL, headers={'User-Agent':'FamilyDashboard/1.0'}), timeout=30) as response:
+with urlopen(Request(URL, headers={
+    "User-Agent": "Mozilla/5.0"
+}), timeout=30) as response:
     feed = response.read()
+
+if not feed.lstrip().startswith(b"BEGIN:VCALENDAR"):
+    raise ValueError(
+        "Google returned a webpage instead of calendar data. "
+        "Check the Public address in iCal format."
+    )
+
 calendar = Calendar.from_ical(feed)
+
 now = datetime.now(timezone.utc)
 end = now + timedelta(days=30)
 entries = []
