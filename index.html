@@ -88,10 +88,32 @@
     font-weight: 700;
   }
   .countdown-row {
-    padding: 9px 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
     border-bottom: 1px solid #00000012;
   }
   .countdown-row:last-child { border-bottom: 0; }
+  .countdown-picture {
+    width: 76px;
+    height: 76px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: #ffffffa8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    line-height: 1;
+  }
+  .countdown-details { flex: 1; min-width: 0; }
+  .countdown-name { display: block; font-size: 19px; }
+  .countdown-days { font-size: 23px; font-weight: 750; margin-top: 5px; }
+  @media (max-width: 600px) {
+    .countdown-picture { width: 60px; height: 60px; font-size: 39px; }
+    .countdown-days { font-size: 19px; }
+  }
   button {
     border: 0;
     border-radius: 12px;
@@ -186,8 +208,10 @@ const sampleEvents = [
 
 // Use YYYY-MM-DD for each special date.
 const specialDates = [
-  { title: "Halloween", date: "2026-10-31" },
-  { title: "Christmas", date: "2026-12-25" }
+  { title: "Halloween", date: "2026-10-31", picture: "🎃" },
+  { title: "Christmas", date: "2026-12-25", picture: "🎄" }
+  // Add more: { title: "Birthday", date: "2027-03-15", picture: "🎂" },
+  // Or use a local image: { title: "Vacation", date: "2027-07-01", image: "images/beach.png" }
 ];
 
 function getSaved(key, fallback) {
@@ -290,14 +314,33 @@ function renderCountdowns() {
 
     const row = document.createElement("div");
     row.className = "countdown-row";
+    const picture = document.createElement("div");
+    picture.className = "countdown-picture";
+    picture.setAttribute("role", "img");
+    picture.setAttribute("aria-label", item.title);
+    if (item.image) {
+      const img = document.createElement("img");
+      img.src = item.image;
+      img.alt = "";
+      img.style.cssText = "width:100%;height:100%;object-fit:contain;border-radius:16px";
+      img.onerror = () => { picture.textContent = item.picture || "🎉"; };
+      picture.appendChild(img);
+    } else {
+      picture.textContent = item.picture || "🎉";
+    }
+    const details = document.createElement("div");
+    details.className = "countdown-details";
     const name = document.createElement("strong");
+    name.className = "countdown-name";
     name.textContent = item.title;
     const remaining = document.createElement("div");
+    remaining.className = "countdown-days";
     remaining.textContent = days === 0
       ? "Today! 🎉"
       : days + (days === 1 ? " day to go" : " days to go");
 
-    row.append(name, remaining);
+    details.append(name, remaining);
+    row.append(picture, details);
     container.appendChild(row);
   });
 }
