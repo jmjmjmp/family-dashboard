@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f3ec">
+<title>Our Family Dashboard</title>
+<style>
+  :root {
+    --ink: #293b32;
+    --muted: #69776e;
+    --paper: #f5f3ec;
+    --card: #ffffff;
+    --green: #e5eee4;
+    --blue: #e6ecfa;
+    --peach: #f8e7df;
+    --purple: #eee5f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont,
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+  }
+  main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 22px;
+  }
+  header, .section-title, .event {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  header { margin-bottom: 18px; }
+  h1 { font-size: 32px; margin: 0 0 5px; }
+  h2 { font-size: 21px; margin: 0 0 14px; }
+  p { margin: 5px 0; }
+  .muted { color: var(--muted); }
+  .weather {
+    background: #fcecc8;
+    border-radius: 18px;
+    padding: 14px 20px;
+    min-width: 145px;
+    text-align: center;
+  }
+  .temperature { font-size: 34px; font-weight: 700; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .card {
+    border-radius: 19px;
+    padding: 20px;
+    min-width: 0;
+  }
+  .agenda { background: var(--card); }
+  .checklist { background: var(--blue); }
+  .chores { background: var(--green); }
+  .countdowns { background: var(--purple); }
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #00000012;
+  }
+  .item:last-child { border-bottom: 0; }
+  input[type="checkbox"] {
+    width: 25px;
+    height: 25px;
+    flex-shrink: 0;
+    accent-color: #46785a;
+  }
+  .done { text-decoration: line-through; opacity: .6; }
+  .event-time {
+    background: #edf0e9;
+    border-radius: 10px;
+    padding: 9px;
+    min-width: 75px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .countdown-row {
+    padding: 9px 0;
+    border-bottom: 1px solid #00000012;
+  }
+  .countdown-row:last-child { border-bottom: 0; }
+  button {
+    border: 0;
+    border-radius: 12px;
+    background: #355b45;
+    color: white;
+    padding: 12px 16px;
+    min-height: 44px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .section-title { margin-bottom: 12px; }
+  .small { font-size: 14px; }
+  @media (max-width: 600px) {
+    main { padding: 13px; }
+    h1 { font-size: 26px; }
+    .grid { gap: 9px; }
+    .card { padding: 14px; }
+    .weather { min-width: 115px; padding: 10px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1>Our Family 🏡</h1>
+      <p id="today" class="muted">Family HQ</p>
+      <p id="clock" class="muted"></p>
+    </div>
+    <div class="weather">
+      <div id="weather-icon">🌤️</div>
+      <div id="temperature" class="temperature">--°</div>
+      <div id="conditions">Loading weather…</div>
+      <div id="highlow" class="small"></div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <section class="card agenda">
+      <h2>📅 Today's agenda</h2>
+      <div id="agenda-list"></div>
+      <p class="muted small" id="agenda-note">
+        Sample events — calendar connection coming next.
+      </p>
+    </section>
+
+    <section class="card checklist">
+      <h2>☀️ My checklist</h2>
+      <div id="checklist-list"></div>
+      <button onclick="resetList('checklist')">
+        Reset checklist
+      </button>
+    </section>
+
+    <section class="card chores">
+      <h2>⭐ Family chores</h2>
+      <div id="chores-list"></div>
+      <p id="chore-progress" class="small"></p>
+      <button onclick="resetList('chores')">Reset chores</button>
+    </section>
+
+    <section class="card countdowns">
+      <h2>🎉 Coming up</h2>
+      <div id="countdown-list"></div>
+      <p class="muted small">
+        Edit the dates in the JavaScript to personalize these.
+      </p>
+    </section>
+  </div>
+</main>
+
+<script>
+const checklistItems = [
+  "Get dressed",
+  "Brush teeth",
+  "Eat breakfast",
+  "Pack school bag"
+];
+
+const choreItems = [
+  "Make my bed",
+  "Feed the pet",
+  "Tidy my toys"
+];
+
+// Replace these sample events with real calendar data later.
+const sampleEvents = [
+  { time: "9:00 AM", title: "School" },
+  { time: "3:30 PM", title: "After-school activity" },
+  { time: "6:00 PM", title: "Family dinner" }
+];
+
+// Use YYYY-MM-DD for each special date.
+const specialDates = [
+  { title: "Halloween", date: "2026-10-31" },
+  { title: "Christmas", date: "2026-12-25" }
+];
+
+function getSaved(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function save(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (_) {}
+}
+
+function renderChecks(id, items) {
+  const saved = getSaved(id, {});
+  const container = document.getElementById(id + "-list");
+  container.innerHTML = "";
+
+  items.forEach((label, index) => {
+    const row = document.createElement("label");
+    row.className = "item";
+
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = !!saved[index];
+
+    const text = document.createElement("span");
+    text.textContent = label;
+    if (check.checked) text.className = "done";
+
+    check.addEventListener("change", () => {
+      const next = getSaved(id, {});
+      next[index] = check.checked;
+      save(id, next);
+      renderChecks(id, items);
+      updateProgress();
+    });
+
+    row.append(check, text);
+    container.appendChild(row);
+  });
+}
+
+function resetList(id) {
+  save(id, {});
+  renderAll();
+}
+
+function updateProgress() {
+  const done = getSaved("chores", {});
+  const count = choreItems.filter((_, i) => !!done[i]).length;
+  document.getElementById("chore-progress").textContent =
+    count + " of " + choreItems.length + " chores completed";
+}
+
+function renderAgenda() {
+  const container = document.getElementById("agenda-list");
+  container.innerHTML = "";
+
+  sampleEvents.forEach(event => {
+    const row = document.createElement("div");
+    row.className = "event item";
+
+    const time = document.createElement("div");
+    time.className = "event-time";
+    time.textContent = event.time;
+
+    const title = document.createElement("div");
+    title.textContent = event.title;
+
+    row.append(time, title);
+    container.appendChild(row);
+  });
+}
+
+function renderCountdowns() {
+  const container = document.getElementById("countdown-list");
+  container.innerHTML = "";
+  const now = new Date();
+  const today = Date.UTC(
+    now.getFullYear(), now.getMonth(), now.getDate()
+  );
+
+  specialDates.forEach(item => {
+    const parts = item.date.split("-").map(Number);
+    const target = Date.UTC(parts[0], parts[1] - 1, parts[2]);
+    let days = Math.ceil((target - today) / 86400000);
+
+    // Past dates count down to the next annual occurrence.
+    if (days < 0) {
+      const next = new Date(parts[0] + 1, parts[1] - 1, parts[2]);
+      days = Math.ceil((Date.UTC(
+        next.getFullYear(), next.getMonth(), next.getDate()
+      ) - today) / 86400000);
+    }
+
+    const row = document.createElement("div");
+    row.className = "countdown-row";
+    const name = document.createElement("strong");
+    name.textContent = item.title;
+    const remaining = document.createElement("div");
+    remaining.textContent = days === 0
+      ? "Today! 🎉"
+      : days + (days === 1 ? " day to go" : " days to go");
+
+    row.append(name, remaining);
+    container.appendChild(row);
+  });
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById("today").textContent =
+    now.toLocaleDateString(undefined, {
+      weekday: "long", month: "long", day: "numeric"
+    });
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString(undefined, {
+      hour: "numeric", minute: "2-digit"
+    });
+}
+
+async function loadWeather() {
+  // Calgary example coordinates. Change these to your location.
+  const latitude = 51.0447;
+  const longitude = -114.0719;
+
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast"
+      + "?latitude=" + latitude
+      + "&longitude=" + longitude
+      + "&current=temperature_2m,weather_code"
+      + "&daily=temperature_2m_max,temperature_2m_min"
+      + "&timezone=auto&forecast_days=1";
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Weather unavailable");
+    const data = await response.json();
+
+    document.getElementById("temperature").textContent =
+      Math.round(data.current.temperature_2m) + "°";
+    document.getElementById("conditions").textContent =
+      weatherDescription(data.current.weather_code);
+    document.getElementById("highlow").textContent =
+      "High " + Math.round(data.daily.temperature_2m_max[0])
+      + "° · Low "
+      + Math.round(data.daily.temperature_2m_min[0]) + "°";
+    document.getElementById("weather-icon").textContent =
+      weatherEmoji(data.current.weather_code);
+  } catch (_) {
+    document.getElementById("conditions").textContent =
+      "Weather unavailable";
+  }
+}
+
+function weatherDescription(code) {
+  if (code === 0) return "Clear sky";
+  if ([1, 2].includes(code)) return "Partly cloudy";
+  if (code === 3) return "Overcast";
+  if ([45, 48].includes(code)) return "Foggy";
+  if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code))
+    return "Rain";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "Snow";
+  if ([95, 96, 99].includes(code)) return "Thunderstorms";
+  return "Current conditions";
+}
+
+function weatherEmoji(code) {
+  if (code === 0) return "☀️";
+  if ([1, 2, 3].includes(code)) return "🌤️";
+  if ([45, 48].includes(code)) return "🌫️";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
+  if ([95, 96, 99].includes(code)) return "⛈️";
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]
+      .includes(code)) return "🌧️";
+  return "🌥️";
+}
+
+function renderAll() {
+  renderChecks("checklist", checklistItems);
+  renderChecks("chores", choreItems);
+  renderAgenda();
+  renderCountdowns();
+  updateProgress();
+  updateClock();
+}
+
+renderAll();
+loadWeather();
+setInterval(updateClock, 30000);
+setInterval(loadWeather, 30 * 60 * 1000);
+</script>
+</body>
+</html>
