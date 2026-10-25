@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f5f3ec">
+<title>Our Family Dashboard</title>
+<style>
+  :root {
+    --ink: #293b32;
+    --muted: #69776e;
+    --paper: #f5f3ec;
+    --card: #ffffff;
+    --green: #e5eee4;
+    --blue: #e6ecfa;
+    --peach: #f8e7df;
+    --purple: #eee5f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont,
+                 "Helvetica Neue", Arial, sans-serif;
+    font-size: 17px;
+  }
+  main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 22px;
+  }
+  header, .section-title, .event {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  header { margin-bottom: 18px; }
+  h1 { font-size: 32px; margin: 0 0 5px; }
+  h2 { font-size: 21px; margin: 0 0 14px; }
+  p { margin: 5px 0; }
+  .muted { color: var(--muted); }
+  .weather {
+    background: #fcecc8;
+    border-radius: 18px;
+    padding: 14px 20px;
+    min-width: 145px;
+    text-align: center;
+  }
+  .temperature { font-size: 34px; font-weight: 700; }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .card {
+    border-radius: 19px;
+    padding: 20px;
+    min-width: 0;
+  }
+  .agenda { background: var(--card); }
+  .checklist { background: var(--blue); }
+  .chores { background: var(--green); }
+  .countdowns { background: var(--purple); }
+  .calendar-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin: 12px 0; }
+  .calendar-actions button { font-size:14px; }
+  .day-heading { font-weight:700; margin: 14px 0 3px; color:var(--ink); }
+  .calendar-error { color:#a33333; }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid #00000012;
+  }
+  .item:last-child { border-bottom: 0; }
+  input[type="checkbox"] {
+    width: 25px;
+    height: 25px;
+    flex-shrink: 0;
+    accent-color: #46785a;
+  }
+  .done { text-decoration: line-through; opacity: .6; }
+  .event-time {
+    background: #edf0e9;
+    border-radius: 10px;
+    padding: 9px;
+    min-width: 75px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .countdown-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid #00000012;
+  }
+  .countdown-row:last-child { border-bottom: 0; }
+  .countdown-picture {
+    width: 76px;
+    height: 76px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: #ffffffa8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    line-height: 1;
+  }
+  .countdown-details { flex: 1; min-width: 0; }
+  .countdown-name { display: block; font-size: 19px; }
+  .countdown-days { font-size: 23px; font-weight: 750; margin-top: 5px; }
+  @media (max-width: 600px) {
+    .countdown-picture { width: 60px; height: 60px; font-size: 39px; }
+    .countdown-days { font-size: 19px; }
+  }
+  button {
+    border: 0;
+    border-radius: 12px;
+    background: #355b45;
+    color: white;
+    padding: 12px 16px;
+    min-height: 44px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .section-title { margin-bottom: 12px; }
+  .small { font-size: 14px; }
+  @media (max-width: 600px) {
+    main { padding: 13px; }
+    h1 { font-size: 26px; }
+    .grid { gap: 9px; }
+    .card { padding: 14px; }
+    .weather { min-width: 115px; padding: 10px; }
+  }
+
+  .chores { grid-column: 1 / -1; }
+  .forecast { background:#e7f0f5; margin-bottom:14px; padding:14px 18px; }
+  .forecast h2 { margin:0 0 10px; font-size:19px; }
+  .forecast-days { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px; }
+  .forecast-day { background:#ffffffb8;border-radius:12px;text-align:center;padding:10px 4px;min-width:0; }
+  .forecast-day .forecast-icon { font-size:30px;line-height:1.3; }
+  .forecast-day .forecast-temps { font-weight:700;font-size:16px;white-space:nowrap; }
+  .forecast-day .forecast-low { color:var(--muted); }
+  .forecast-day .forecast-rain { color:#286b93;font-size:13px; }
+  @media(max-width:600px) { .forecast {padding:10px;} .forecast-days {gap:4px;} .forecast-day {padding:8px 2px;} .forecast-day .forecast-icon {font-size:23px;} .forecast-day .forecast-temps {font-size:13px;} .forecast-day .forecast-rain {font-size:11px;} }
+  .kids-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));gap:14px; }
+  .kid-panel { background:rgba(255,255,255,.75);border-radius:18px;padding:14px; }
+  .kid-panel.ollie { border-top:7px solid #8ac1ed; }
+  .kid-panel.leo { border-top:7px solid #ffc88c; }
+  .kid-heading { display:flex;align-items:center;justify-content:space-between;margin-bottom:10px; }
+  .kid-heading h3 { margin:0;font-size:25px; }
+  .task-grid { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px; }
+  .task-tile { background:white;border:2px solid transparent;border-radius:14px;min-height:166px;padding:9px 4px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;cursor:pointer;user-select:none; }
+  .task-tile img { width:100%;max-width:86px;height:85px;object-fit:contain; }
+  .task-tile span { font-size:13px;line-height:1.2;font-weight:650;min-height:32px; }
+  .task-tile input { width:27px;height:27px;accent-color:#40825c; }
+  .task-tile.completed { border-color:#6eae7b;background:#edf8ed; }
+  .task-tile.completed span { text-decoration:line-through;opacity:.65; }
+  .task-tile.disabled { opacity:.4;cursor:default; }
+  .chores-foot { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;flex-wrap:wrap; }
+  @media(max-width:650px) { .kids-grid {grid-template-columns:1fr;} .task-tile {min-height:145px;} }
+  @media(max-width:420px) { .task-grid {gap:4px;} .task-tile {padding:6px 2px;min-height:130px;} .task-tile img {height:60px;} .task-tile span {font-size:11px;} }
+
+/* Compact landscape dashboard: forecast shares the header with date/time. */
+html, body { min-height:100%; }
+main { max-width:none; padding:12px 16px 6px; }
+.topbar { display:grid; grid-template-columns:minmax(180px, 25%) minmax(0,1fr); gap:14px; align-items:center; margin-bottom:10px; }
+.family-heading h1 { font-size:clamp(22px,2.8vw,34px);margin-bottom:3px; }
+.family-heading p { margin:2px 0;font-size:clamp(13px,1.4vw,17px); }
+.forecast { margin:0; padding:8px 10px; border-radius:15px; background:#e7f0f5; }
+.forecast-label { font-weight:700;font-size:13px;margin-bottom:4px; }
+.forecast-days { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px; }
+.forecast-day { padding:4px 2px; border-radius:9px; }
+.forecast-day .forecast-icon { font-size:clamp(17px,2.4vw,25px);line-height:1.1; }
+.forecast-day .forecast-temps { font-size:clamp(11px,1.3vw,14px); }
+.forecast-day .forecast-rain { font-size:11px; }
+.dashboard-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:minmax(0, 68fr) minmax(0, 32fr);gap:8px; }
+.dashboard-grid > .card { min-height:0;overflow:auto;padding:11px 13px;border-radius:15px; }
+.dashboard-grid h2 { font-size:clamp(16px,1.7vw,20px);margin:0 0 5px; }
+.agenda { display:flex;flex-direction:column; }
+#family-calendar { width:100%;flex:1;min-height:0;border:0;border-radius:9px;background:white; }
+.kid-panel { padding:2px;background:transparent;border:0!important; }
+.kid-heading { display:none; }
+.kids-grid { display:block; }
+.task-grid { gap:5px; }
+.task-tile { min-height:0;padding:3px 2px;border-radius:10px; }
+.task-tile img { height:clamp(28px,4.6vh,48px);max-width:60px; }
+.task-tile span { font-size:clamp(10px,1.1vw,12px);min-height:26px; }
+.task-tile input { width:21px;height:21px;margin:1px 0; }
+.kid-card p { margin:2px 0 0;text-align:right;font-size:11px; }
+.ollie-card { background:#e5f0fc; }
+.leo-card { background:#f9ebdc; }
+.countdown-row { padding:5px 0; }
+.reset-button { display:block;margin:3px 0 0 auto;padding:4px 10px;min-height:26px;font-size:12px; }
+@media (orientation:landscape) and (min-width:700px) {
+  html,body { height:100%;overflow:hidden; }
+  main { height:100dvh; height:100vh;display:flex;flex-direction:column; }
+  .topbar { flex:0 0 auto; }
+  .dashboard-grid { flex:1;min-height:0; }
+}
+@media (max-width:699px), (orientation:portrait) {
+  .topbar { grid-template-columns:1fr; }
+  .dashboard-grid { grid-template-columns:1fr;grid-template-rows:auto; }
+  .dashboard-grid > .card { min-height:240px; }
+  #family-calendar { min-height:300px; }
+}
+
+/* Pokémon-inspired, no-scroll landscape redesign */
+:root {--ink:#102b47;--muted:#425a70;--paper:#d8f1f5;--green:#dcf3dc;--blue:#e0f3ff;--purple:#fff3ce;}
+html,body {margin:0;width:100%;height:100%;overflow:hidden;}
+body {background:linear-gradient(145deg,#83d6fc 0%,#d7f7ff 28%,#a2dfb0 72%,#4ca774 100%);}
+body:before {content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background:radial-gradient(circle at 8% 90%,#24773b 0 8%,transparent 9%),radial-gradient(circle at 92% 80%,#2b944f 0 12%,transparent 13%);}
+main {position:relative;max-width:none;width:100%;height:100vh;height:100dvh;overflow:hidden;padding:clamp(5px,1vh,10px);display:flex;flex-direction:column;gap:clamp(4px,.8vh,8px);}
+.topbar {display:grid;grid-template-columns:minmax(165px,29%) minmax(0,1fr);gap:8px;margin:0;min-height:0;flex:0 0 auto;max-height:24%;align-items:stretch;}
+.family-heading {background:linear-gradient(100deg,#c6ecffdd,#e9faffdd);border:2px solid #2779b0;border-radius:13px;padding:5px 70px 5px 10px;position:relative;overflow:hidden;min-height:70px;}
+.family-heading:after {content:"";position:absolute;right:0;bottom:0;width:clamp(55px,10vw,112px);height:100%;background:url('gengar.png') right bottom/contain no-repeat;}
+.family-heading h1 {font-size:clamp(18px,2.5vw,32px);line-height:1.05;color:#f6cc26;-webkit-text-stroke:.65px #173e77;text-shadow:1px 2px #174f8b;margin:0 0 2px;white-space:nowrap;}
+.family-heading p {font-size:clamp(11px,1.45vw,17px);line-height:1.1;margin:1px 0;}
+.pokeball {color:#df4040;-webkit-text-stroke:1px #183b67;}
+.forecast {padding:4px 8px;border:2px solid #2b80a6;border-radius:13px;background:#e2f5ffea;min-height:0;}
+.forecast-label {font-size:clamp(10px,1.4vw,15px);margin:0 0 2px;line-height:1;}
+#current-temp {font-size:clamp(16px,2.6vw,29px);color:#126b9e;}
+.forecast-days {gap:3px;}
+.forecast-day {padding:2px 1px;background:#fff9;border-radius:8px;}
+.forecast-day .small {font-size:clamp(9px,1.15vw,13px)!important;line-height:1;}
+.forecast-day .forecast-icon {font-size:clamp(14px,2.4vw,26px);line-height:1;}
+.forecast-day .forecast-temps {font-size:clamp(9px,1.25vw,14px);line-height:1.1;}
+.forecast-day .forecast-rain {font-size:clamp(9px,1.1vw,12px);line-height:1.1;}
+.dashboard-grid {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-rows:minmax(0,64fr) minmax(0,36fr);gap:clamp(4px,.7vh,8px);flex:1;min-height:0;}
+.dashboard-grid > .card {min-height:0;overflow:hidden;padding:clamp(5px,.8vh,10px);border:2px solid #2576a4;border-radius:13px;box-shadow:0 2px 4px #154b6433;}
+.dashboard-grid h2 {font-size:clamp(14px,2vw,21px);margin:0 0 3px;line-height:1.1;}
+.agenda {background:#e7f6ffed;display:flex;flex-direction:column;}
+.countdowns {background:#fff4d8f2;}
+#family-calendar {display:flex;flex-direction:column;min-height:0;flex:1;overflow:hidden;gap:2px;background:transparent;}
+.calendar-event {display:flex;align-items:center;gap:7px;background:#fff9;border-radius:8px;padding:clamp(2px,.6vh,7px) 7px;min-height:0;flex:1;}
+.calendar-event-icon {font-size:clamp(20px,3.1vh,34px);line-height:1;flex:0 0 38px;text-align:center;}
+.calendar-event-detail {min-width:0;display:flex;align-items:center;gap:8px;flex:1;}
+.calendar-event-detail strong {font-size:clamp(12px,1.55vw,18px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.calendar-when {font-size:clamp(10px,1.15vw,14px);color:#365d78;white-space:nowrap;}
+.countdown-row {padding:clamp(2px,.45vh,6px) 0;gap:6px;}
+.countdown-picture {width:clamp(32px,5.2vh,55px)!important;height:clamp(32px,5.2vh,55px)!important;font-size:clamp(24px,4vh,40px)!important;}
+.countdown-name {font-size:clamp(12px,1.7vw,18px)!important;}
+.countdown-days {font-size:clamp(13px,1.8vw,20px)!important;margin-top:1px!important;}
+.kid-card {padding:4px 6px!important;}
+.ollie-card {background:#d9f0ffed;}.leo-card {background:#ffe6c9ed;}
+.task-grid {gap:clamp(2px,.5vw,6px);}
+.task-tile {padding:2px 1px;border-radius:7px;}
+.task-tile img {height:clamp(20px,4.2vh,42px);max-width:95%;}
+.task-tile span {font-size:clamp(9px,1.05vw,12px);line-height:1.08;min-height:0;}
+.task-tile input {width:clamp(16px,2.5vh,23px);height:clamp(16px,2.5vh,23px);margin:0;}
+.kid-card p {font-size:clamp(9px,1.1vw,12px);margin:1px 0;}
+.reset-button {flex:0 0 auto;margin:0 0 0 auto;padding:2px 8px;min-height:22px;font-size:11px;}
+@media (max-height:650px) and (orientation:landscape) {
+ .topbar {max-height:21%;} .dashboard-grid {grid-template-rows:minmax(0,65fr) minmax(0,35fr);}
+ .calendar-event:nth-child(n+6) {display:none;}
+ .countdown-row:nth-child(n+5) {display:none;}
+}
+@media (orientation:portrait) {html,body{overflow:auto;}main{height:auto;min-height:100vh;overflow:visible}.topbar{grid-template-columns:1fr;max-height:none}.dashboard-grid{grid-template-columns:1fr;grid-template-rows:auto}.dashboard-grid>.card{min-height:170px}.task-tile img{height:45px}}
+
+
+/* 2026 kitchen iPad landscape redesign — no internal scrolling */
+:root{--ink:#11294b;--muted:#53657c}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Trebuchet MS",Arial,sans-serif;background:#258e62 url("forest-background.jpg") center/cover fixed;color:var(--ink)}
+body:before{content:"";position:fixed;inset:0;background:linear-gradient(#3ca8d155,#006b4255);pointer-events:none}
+main{position:relative;display:flex;flex-direction:column;width:100%;height:100vh;height:100dvh;max-width:none;padding:clamp(5px,.9vh,9px);gap:clamp(4px,.7vh,8px);overflow:hidden}
+.topbar{display:grid;grid-template-columns:minmax(0,41%) minmax(0,59%);gap:8px;flex:0 0 clamp(78px,16vh,120px);max-height:none;min-height:0;margin:0}
+.family-heading{background:linear-gradient(90deg,#155a8ed9,#228ccba8);border:2px solid #064e84;border-radius:18px;padding:8px 68px 4px clamp(64px,9vw,120px);min-height:0;overflow:hidden;position:relative}
+.family-heading:before{content:"";position:absolute;left:0;bottom:0;width:clamp(60px,10vw,125px);height:100%;background:url("pikachu.png") left bottom/contain no-repeat}
+.family-heading:after{content:"";position:absolute;right:0;bottom:0;width:clamp(60px,10vw,110px);height:100%;background:url("gengar-character.png") right bottom/contain no-repeat}
+.family-heading h1{font-size:clamp(23px,3.4vw,45px);color:#ffdd37;-webkit-text-stroke:1px #0d3770;text-shadow:2px 3px 0 #0b468a;white-space:nowrap;line-height:1.1}
+.family-heading p{color:white;font-weight:750;font-size:clamp(11px,1.4vw,18px);margin:1px 0}
+.forecast{border:2px solid #1785cb;border-radius:18px;background:#e5f7ffed;padding:5px 8px;min-height:0;display:flex;flex-direction:column;justify-content:center}
+.forecast-label{font-size:clamp(12px,1.5vw,18px);line-height:1.1;margin:0 0 3px;color:#113d67}
+#current-temp{font-size:clamp(17px,2.4vw,31px);color:#135b96}
+.forecast-days{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;min-height:0}
+.forecast-day{padding:2px;background:#ffffff8a;border-radius:9px;min-width:0}
+.forecast-day .forecast-icon{font-size:clamp(17px,2.8vh,28px);line-height:1}
+.forecast-day .forecast-temps{font-size:clamp(10px,1.3vw,16px)}
+.forecast-day .forecast-rain{font-size:clamp(9px,1vw,12px)}
+.dashboard-grid{display:grid;grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr);grid-template-rows:minmax(0,1fr) minmax(0,.32fr) minmax(0,.32fr);gap:clamp(4px,.8vh,9px);flex:1;min-height:0}
+.dashboard-grid>.card{border:3px solid #2387c0;border-radius:20px;box-shadow:0 3px 0 #003c5c77;padding:clamp(6px,.9vh,12px);overflow:hidden;min-height:0}
+.dashboard-grid h2{font-size:clamp(17px,2.1vw,28px);margin:0 0 5px;font-weight:900;line-height:1.1}
+.agenda{grid-column:1;grid-row:1;background:#e4f6fffa}
+.countdowns{grid-column:2;grid-row:1;background:#fff5d9fa;border-color:#e3ae37!important}
+.ollie-card{grid-column:1/-1;grid-row:2;background:#d5effffa}
+.leo-card{grid-column:1/-1;grid-row:3;background:#ffe8cafa;border-color:#d9a54d!important}
+.kid-card{display:grid;grid-template-columns:clamp(105px,17%,230px) minmax(0,1fr);grid-template-rows:minmax(0,1fr);align-items:center;gap:6px}
+.kid-card h2{margin:0!important;align-self:center;font-size:clamp(17px,2.2vw,28px)}
+.kid-card>div{min-width:0;height:100%}
+.kid-card p{display:none}
+.kid-panel{height:100%;padding:0;background:transparent;border:0!important}
+.kid-heading{display:none}.kids-grid{display:block;height:100%}
+.task-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));height:100%;gap:clamp(3px,.6vw,9px)}
+.task-tile{min-height:0;height:100%;padding:3px 5px;border:2px solid #d4e9f4;border-radius:14px;background:#ffffffeb;display:grid;grid-template-columns:clamp(32px,6vw,78px) minmax(0,1fr) clamp(19px,2.5vw,30px);align-items:center;justify-content:initial;gap:4px;text-align:left}
+.task-tile img{width:100%;height:clamp(34px,8vh,76px);max-width:100%;object-fit:contain}
+.task-tile span{font-size:clamp(10px,1.22vw,16px);font-weight:750;min-height:0;line-height:1.1}
+.task-tile input{width:clamp(18px,2.4vw,28px);height:clamp(18px,2.4vw,28px);margin:0}
+.task-tile.completed{background:#e5f8e9;border-color:#31a34c}
+#family-calendar{display:flex;flex-direction:column;gap:3px;overflow:hidden;flex:1;min-height:0}
+.calendar-event{display:grid;grid-template-columns:minmax(68px,24%) clamp(24px,4vw,46px) minmax(0,1fr);gap:6px;align-items:center;background:#ffffffb9;border-radius:10px;padding:4px 7px;min-height:0;flex:1}
+.calendar-when{grid-column:1;grid-row:1;font-size:clamp(10px,1.1vw,15px);font-weight:800;white-space:normal;line-height:1.1;background:#e5edf4;border-radius:9px;padding:5px 2px;text-align:center;color:#234367}
+.calendar-event-icon{grid-column:2;grid-row:1;font-size:clamp(20px,3.8vh,39px);line-height:1;text-align:center}
+.calendar-event-detail{display:contents}
+.calendar-event-detail strong{grid-column:3;grid-row:1;font-size:clamp(12px,1.6vw,21px);font-weight:800;white-space:normal;line-height:1.1;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.countdown-row{display:grid;grid-template-columns:clamp(42px,8vh,80px) minmax(0,1fr) auto;align-items:center;gap:clamp(6px,1vw,15px);padding:clamp(3px,.8vh,10px) 2px;border-bottom:2px solid #d9bd855c}
+.countdown-picture{width:clamp(42px,8vh,80px)!important;height:clamp(42px,8vh,80px)!important;font-size:clamp(30px,6vh,57px)!important;background:#fff9}
+.countdown-name{font-size:clamp(14px,1.7vw,23px)!important;line-height:1.12}
+.countdown-days{font-size:clamp(15px,1.9vw,24px)!important;color:#125080}
+.reset-button{position:absolute;right:10px;bottom:2px;z-index:3;font-size:10px;min-height:0;padding:2px 7px;background:#235a80d9}
+@media (max-height:660px) and (orientation:landscape){.topbar{flex-basis:72px}.dashboard-grid{grid-template-rows:minmax(0,1fr) minmax(0,.31fr) minmax(0,.31fr)}.calendar-event:nth-child(n+6){display:none}.countdown-row:nth-child(n+5){display:none}.task-tile img{height:clamp(25px,6vh,50px)}}
+@media (orientation:portrait){html,body{overflow:auto}main{height:auto;min-height:100vh;overflow:visible}.topbar{grid-template-columns:1fr;flex-basis:auto}.family-heading{min-height:90px}.dashboard-grid{display:flex;flex-direction:column}.dashboard-grid>.card{min-height:200px}.kid-card{display:block}.kid-card>div{height:120px}.task-tile{grid-template-columns:1fr;text-align:center}.task-tile img{height:45px}}
+
+.countdown-date{font-size:clamp(11px,1.2vw,17px);color:#6e7480;margin-top:3px}.days-badge{background:#d8edff;border-radius:13px;padding:5px 9px;text-align:center;min-width:65px}.countdown-row:nth-child(3n+1) .days-badge{background:#ffe4c4}.countdown-row:nth-child(3n) .days-badge{background:#dcf3d4}
+
+/* Tap a forecast day to see details without changing dashboard dimensions. */
+.forecast-day{cursor:pointer;border:1px solid transparent;font:inherit;color:inherit;touch-action:manipulation}
+.forecast-day:focus{outline:2px solid #126cb4;outline-offset:-2px}
+.weather-overlay[hidden]{display:none!important}
+.weather-overlay{position:fixed;inset:0;z-index:1000;background:#092e52a8;display:flex;align-items:center;justify-content:center;padding:18px}
+.weather-detail{position:relative;width:min(690px,96vw);max-height:88vh;overflow:auto;background:linear-gradient(145deg,#e3f7ff,#fff9df);border:4px solid #2387c0;border-radius:24px;box-shadow:0 14px 45px #001e43aa;padding:18px 20px;color:#12335a}
+.weather-detail h2{font-size:clamp(21px,3vw,30px);margin:0 45px 6px 0}
+.weather-close{position:absolute;top:9px;right:10px;background:#155a8e;color:#fff;border:0;border-radius:14px;font-size:25px;width:44px;height:44px;padding:0;cursor:pointer}
+.weather-summary{font-size:17px;font-weight:700;margin:6px 0 12px}
+.weather-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.weather-stat{background:#fff9;border-radius:12px;padding:9px;text-align:center;font-size:14px}
+.weather-stat strong{display:block;font-size:19px}
+.hourly-heading{font-size:17px;font-weight:800;margin:8px 0}
+.hourly-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.hourly-cell{background:#fff;border-radius:10px;padding:7px 2px;text-align:center;font-size:12px;line-height:1.4}
+.hourly-cell b{display:block;font-size:15px}
+@media(max-width:600px){.weather-detail{padding:12px}.weather-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.hourly-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+
+/* Calendar: compact, top-aligned agenda rows with date on the left. */
+#family-calendar {justify-content:flex-start!important;align-content:start!important;gap:4px!important;}
+#family-calendar .calendar-event {flex:0 0 auto!important;height:clamp(45px,7.2vh,61px)!important;min-height:0!important;display:grid!important;grid-template-columns:clamp(83px,11vw,122px) clamp(28px,4vw,44px) minmax(0,1fr)!important;align-items:center!important;gap:8px!important;padding:4px 8px!important;border-bottom:1px solid #d5e5ef;border-radius:8px;background:rgba(255,255,255,.82);}
+#family-calendar .calendar-when {grid-column:1!important;grid-row:1!important;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:2px;padding:4px 7px!important;text-align:left!important;white-space:normal!important;font-size:clamp(11px,1.2vw,15px)!important;line-height:1.1!important;}
+#family-calendar .calendar-when .event-day {font-weight:850;color:#153b5e;}
+#family-calendar .calendar-when .event-time {font-weight:650;color:#4e6a80;font-size:.88em;}
+#family-calendar .calendar-event-icon {grid-column:2!important;grid-row:1!important;font-size:clamp(22px,3.3vh,34px)!important;flex:initial!important;}
+#family-calendar .calendar-event-detail strong {grid-column:3!important;grid-row:1!important;font-size:clamp(13px,1.55vw,19px)!important;line-height:1.2!important;}
+
+
+/* Day-by-day calendar with touch navigation */
+.calendar-header {display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.calendar-header h2 {margin:0}
+.calendar-nav {display:flex;align-items:center;gap:5px}
+.calendar-nav button {border:1px solid #b8d9ed;background:#f0faff;color:#183b5b;border-radius:10px;min-width:34px;height:32px;font-size:23px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.calendar-nav #calendar-today {font-size:12px;padding:0 8px}
+#calendar-selected-day {font-size:clamp(11px,1.35vw,17px);font-weight:800;min-width:86px;text-align:center;color:#173c5b}
+#family-calendar {touch-action:pan-y}
+#family-calendar .calendar-event {grid-template-columns:clamp(75px,10vw,115px) clamp(28px,4vw,44px) minmax(0,1fr)!important}
+#family-calendar .calendar-when .event-day {display:none}
+#family-calendar .calendar-when {align-items:center!important}
+.calendar-empty {padding:18px 10px;color:#56718a;font-weight:700;text-align:left}
+@media(max-width:850px){.calendar-header h2{font-size:clamp(16px,2.4vw,23px)}.calendar-nav button{height:28px;min-width:28px}}
+
+.temperature-chart{display:block;width:100%;height:auto;max-height:245px;background:#fff;border-radius:15px;border:1px solid #cfe2f1;margin-top:9px}
+</style>
+</head>
+<body>
+<main>
+  <header class="topbar">
+    <div class="family-heading">
+      <h1>⚡ Our Family <span class="pokeball">◉</span></h1>
+      <p id="today" class="muted">Family HQ</p>
+      <p id="clock" class="muted"></p>
+    </div>
+    <section class="forecast" aria-label="Five-day Calgary weather forecast">
+      <div class="forecast-label">🌤️ Calgary <strong id="current-temp">--°</strong> · 5-day forecast</div>
+      <div id="forecast-days" class="forecast-days"><p class="muted small">Loading forecast…</p></div>
+    </section>
+  </header>
+
+  <div class="dashboard-grid">
+    <section class="card agenda">
+      <div class="calendar-header">
+        <h2>📅 Family calendar</h2>
+        <div class="calendar-nav" aria-label="Choose calendar day">
+          <button type="button" id="calendar-prev" aria-label="Previous day">‹</button>
+          <span id="calendar-selected-day" aria-live="polite">Today</span>
+          <button type="button" id="calendar-next" aria-label="Next day">›</button>
+          <button type="button" id="calendar-today">Today</button>
+        </div>
+      </div>
+<div id="family-calendar" role="region" aria-label="Upcoming family events"><p class="muted">Loading calendar…</p></div>
+    </section>
+    <section class="card countdowns">
+      <h2>🎉 Coming up</h2>
+      <div id="countdown-list"></div>
+    </section>
+    <section class="card chores kid-card ollie-card">
+      <h2>🔵 Ollie’s Chores</h2>
+      <div id="ollie-chores"></div>
+      <p id="ollie-progress" class="small"></p>
+    </section>
+    <section class="card chores kid-card leo-card">
+      <h2>🟠 Léo’s Chores</h2>
+      <div id="leo-chores"></div>
+      <p id="leo-progress" class="small"></p>
+    </section>
+  </div>
+  <div class="weather-overlay" id="weather-overlay" hidden role="dialog" aria-modal="true" aria-label="Detailed daily weather forecast">
+    <div class="weather-detail">
+      <button class="weather-close" id="weather-close" aria-label="Close forecast">×</button>
+      <h2 id="detail-title">Weather forecast</h2>
+      <div id="detail-content"></div>
+    </div>
+  </div>
+  <button class="reset-button" onclick="resetTodaysChores()">Reset today's chores</button>
+</main>
+
+<script>
+const chorePictures = [
+  'data:image/webp;base64,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',
+  'data:image/webp;base64,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',
+  'data:image/webp;base64,UklGRnwHAABXRUJQVlA4IHAHAAAQIACdASpoAGsAPl0okEWjoqGU7EUsOAXEswBn7Q+/jNdI675u9O/o34k/pXtA0iHxf9Z/3XSc8wD9VOkB5gOg76AH8d/5/WGegf5bHsqftH+1Xtb1lzmR9R+0+Up/WcNewRvkBAGRBejcSZQA/O3oVf8/lc+nPYH/WL/m+uB7H/3JM80hxI8tz/JL8DGwF2IlX9Q+S2yn16zzV2b7LQ7UAJCdbCtHlChtpPux/wqecDrzqcfe1Sp6XZJbC8PDWVvXC2GCAr9yDTjYKqiO1E1xvVQUVddE84IlCaUl/s5DZrnRPl6IVLPnBuxNY20HdIUESThzZYHXW0S+zNBpduwS4YpPTVvvPLgAAP79Z5bNcErqZZunubcvFHXQ7696uEeFyVvDJQbrURej0j13fvvOS1KPsgv7WAB1m63bMWcvjZQ7X2Z0dLJRiG9tKDxDTKON5QIy2PkmYwYzOMOVuPK2vNOhi1IRrkD9e5H2fZXJpic9C61vNdGX9VEhueg7fwonXjSlN+Xf3H17iA3h/nj6PWucvqMo/si7XvPFpfuiRlSAKIGXYyLRUl2ZExikV2O8BT6Neriu4J5GOinOOIfkRO0/wCvQcAGfXw8IHJNbgub3MbehL5yGLnXrPvKIZkP5dm8woclN2QAD3SHRUgOnsT7lxL/tLHwaMJQ7HkcPXrCag7nzNkdaN5Jk7ztInTYUV2nenyEIm4+WrlJ8MIcw8KeIyuDl1XFL5osR0J/1wWybWKNsfqnQosxqZkKBibc/kpNibWs+uMGt/np8Vf4A5LRsYubRWa1mgsQ/Bh35CxTWmnH/qr2Ne/gtFdvrDMDftJrPXTitBSaUat1LYahk0z9ruAkZLO5rFdoqqQr2opbMqIRus/w758T7caPmyCePedviVQ40nWZocqkAZVwkiBTLiJ1ZBku0XUB795vQ12hn+CrWh1uUK7AIneq0+1lxDeGEet4iLGgdhJZeEklWUooWodV5xCSbeACvRCg5OfO8BhknY8cZCgnv784xLW4Scvl+oaWvXOBjfvGWkPvEMvbQTMwZNjwJcrJW6cFIHoZ80SQMpe9qEgAnb9/+uc0z/GCFvuGcbajHI/TPb/j++FbJSQjcwBn/BfuYHNja0lKoqI/vFTRiKPd91C9I6o0OzcfYqbQlINemcpRDF6W/iGh5kjcWVOixPs1R0wcMKHk41iZO4y3QtiXpbfedqYf25GRRuhIcVPcAW/CfCfUp1vjp803/68hQe0+22T5atddxcn7IYK57FbJyp5DKJDZnQYa77yM0Th0Rgp61nbd14TOU6nWkxyPsIvWHYDZe1H4ov85p+BBUfmnx+3iPoZxSJ5Nw9yAAJF1Jiv2uZ3kj3rVeZJbt7fiL985pzgbla+lu/HQX4FmCIKRL55AzbIycTu+yJWLT4v1ueySfcdavLpWY9Nt4i8JeY9u2FcBoLIQiEvQsdDWvDpb4vUe7VWWfcG5yrlWD7452yx0fqJ/xAuDLOFwRG+xrXo5+vMWDXpNFZbLWp0oFbvr6ZBgOKPDOqVzdLzSD273vNMIAOdv3gsgwfLB+23m/Qvt3hHWA3k1/utHd4YgYeatW4WLITk16c9vTnqqqHIqarhIObDms4JcAaikXiWARKFDZlS8ecxm0FQ/821P2/gIwivpEZ8T4vBn+b+ZYv/lecdvg1q+Aoc4lozLbiaJqmpiAK/P/EkuFeDjIolL5gySBYx6Eow/z6WjzosNBmGr+JtVVPYkzgU0Xbst99S0toHV4hl/7v7WBqP9YFG0nRACh3JAmWIjnNw5zgZMaLWOBp3t/w76axVGDgNQlOqKUczDUqe2s4u5EGQA4WGDPfw99ExNWop034ZNyKO9mMtTLzFsX/UZyxBWk6mcFNPIWQkhODTg83XeYt7bRW32rYJ0NxY6xw0nUxsYViaHpbjUN2Rm85jPgcZn8qHjxjuWFLfirrNqebj52pGxJHrLRvjVf1Af/+dp43jdse2ShP/p9iM/YSqQXZ8lNl/BpoJT3OSWIwIfJeK26aYgUwu1KTZB7SzI/fazHF/qyn8Cc//ggZySvv/02/XZuy6bmkjllIVxkbvJOGKC5b4qV1WnbRHqJc67yZPQhCrCf8Vr6G5DWjhgoNOghOeYTS15GG9E1ldXWWhY3U8quabIDSvSOyRwBBieNPyMEfQMEkHzO6jEZvhtkCldvnbJvRlAxU6UKiOADLxVsLt91ZrGXgy+DOhFrPn5j+8NErNglLPz4sDUBTuLAJT5uTfQdKil+AE+dJGmFK1gfMfl/ysu8VJZ2Ikr7KrlwWaan/Okf9vHJ6b1aTe+acqD7lQF3h64/OeR61As0k3yFHEhh03faSZrqiQVf+dMUNHXwzy+GgxtdhvKM3VZqK/AM6Nn/6dk4M1QPaIdpSSkhpl/AnjxyYUxi0KDuuWbPBpkuCLqAD1nevmIabH593AEVYaAUUiuljUyrES5CP1AsZMkQb8evjZ3fuDyGDK1wzsTHeq64WYtOROab9ZTXgOiZuKn8nffJNFl8d1QAC8fAAA==',
+  'data:image/webp;base64,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',
+  'data:image/webp;base64,UklGRsQJAABXRUJQVlA4ILgJAADwKACdASpoAGsAPlkmj0SjoiGWi58EOAWEtgBkhx0vLy3/B+cXYX7Z+KebVNz2Y49/Ub+jvYH5yfmA/Zj1Zf8/6sPQA/UnrMPQI/cX03/29+E/92f249pH//3ZnpZ/UaRb7E/pOHXeK/zr/N7+CAD6q/6Xwc/530h7k3jAqAf5c9AnOz9Nf9//JfAP/Mf61/1+v9+63s3fsArayIlLJx8KqNX34PRCKyM2yzDRR3GP5v1l8LZ/yqIB7NU5oay6LXke0B4c9CdPk1E1q+B5G6QwoOI6UYsbSSa+KkBRJWTlRKZ2lnNFwrFFT8d14TbNxLnmXuY3m7jp8273Lt/Y7b86w+1bnb6vDb8jswBDK/LjBlZo1SV3Lv53OHSJS033dYQ2hoUCpncDOK3Xp+Q4ZJsrBRDODqnhTfgwO9twbMd1D6TDhiJBhJ6Rero7OkAiW9AA/v2rU0gkpjdTLLaWAu/kPWFpA0209R7dvmMx3ilb+p+l0PDMBvH9UN5hy8yTS5DQ1IVG8aM5ZpAGNnJTn6F3S8cU5ShjHrQLEFxqxwhqNumKXQSlBn/PEPFvdzNsVeVGax++WZzQgtWGW1cn8mzzITq+I38RKpS5KJVuA1xULwN0xw86UFylmAD8/Ib0VO9/cZbDK+JXtoGE/rcSDSLx/78obYO+502J/x4+R3df1BMGKi0SpF4E3gzria7RgcUICExKToAx9GAb4luMa5IbGZkY7T+hlqR4cKUkstfVyS2q/dszaRVuqn06au6A6WwPalQhtin9aZQsZvVDHaLfkFR/BxcUkXAcmdqQ68smpYVZcto+95PiXfMASdMePLetI7gI+gpvIem7g33rvs8O7X7zjvT2hxm9qwgf+GuXv7jBZAT3A+/4P3bIaNTUNqq/TzMEQWMf4iJTQBnyCXa9Wr/4M/PEK75dhhFu/nYr4QCu3COtTZbAtmE5fjzsSDJ3scpcJw4ttld8BNTrK1KZ8hBHezrmIbtWKVZt59Ir+12c4EqW9CZ7EO5ysj2DWsPJtiP9cO71XEcNYiXYcKwUrv9VMsjt/N6pEhuJrTnDC7qCKV3H5orLy6ttYRXKv7A0Lt7igcnIKgoEQlPzXZsbaMn4pOdRgYuXfh9LvXhjQSi0N71NMn0ID4WESka9NghCYoy3jj/l+49JW1kvJKnh44Rd7JCe+ZPzjWgIhlbZBU1zt1fayWR2OKTSq+W9w50Km/8W1WDhzgouob08SUBbj8WLHTOrTfZGHn7FST1EDxavRPnKVW19c/SF6FWm0cf62tPPwG57/v7jrJpMRWNGp67jY5fLTeMJo2czcnv4PPrqxsVAYEk39DHvx2Jx2YxOVJTt2DNMhDL2bfKGqJPLkAh0/zZ/v3bEMy81A+LK9gwxhFv54cxz+52wM6AYgyOGJUCsvzKqXhG9Zh3lUPTZV/0DQtPS+p2tPaBm0j5pzUDaR+0EbjdcGemIHk0h3ms2tzdAC2mGJbxeP2+HP+aHmG6tdCjcm3Rbm1V4xNKo6gLLRaEsrGLonLFMpiAJQN4PbTObVuvvZrvJO7/H1L9G0EVlDraCM0hMYXup0mHhn0MdQlzn9zwSs8xfWs+Ba4zK7MLilGL43ylwtpxn//Tk5t0PGt5tQbVofS3BgItJ3Gv2lQqKT/AbaYrH96l6dSIk536PfOZiOuj1RTQs2XtedOtA3N1GJte8TZ2fHqAqB434TeqQEmKQlz5F7Di75Asm3AJH0VUw9V4UnzwMNUBINxXt4fwxQcK5HJBOpWA4xTtZ6vU6mfYzhjvEcvCDGo7NVIZl9qN9pNzv60nlwB8cAowAvGTQo0Fev8NfFt9aryEbfDJbvQiJpZ9nHemroJayLcjoNtM0+yFmnv1d9xMIwxzZq529aA1nyVCXuE2XH730upbnJhviN4RtqwCZGKx5qShkdwoaq8OHb/y5X+YfWbYfsM5/3wRc4fYe5Ze52VbNVNGbSQs4rj8H0gPWQLCV1KPJoyqiEmW7d4ZefQYES2mWE4FDd38ozyLDxkDHM6oDneEgwl5RHanfFDvAIPqnYOk59y9EGEwmu+qXZG/5Mx3q85qD+6FYeuxxBT84aILfCOF9FjrG4eTS4jKC8yAtAzt44TbzArssparKgH1ImdVqq+9jyAcbdFi2tJHAIYJ1X0+4SPAefSD/kidBui6RTaz76iu3qQlHwg01sOav/rU0Db4/rZ8I4bAYdyH5Hhd6DKI/8gaphJG/M/5X8nF+MQvm+aGJH5BpNX5JsSV5zaDLJ+v+QjBss/V2YAOIRGRlFVNPptgH/oDNwTri78KtWNDFY67ZX6Qt6SxcBEA3FQerZK0sBiS24NIu4NGb1NBhaYY3YffHAEQ+6gS+PPvPwgD88UHAok/YkM1tgcC1Tf7e4VXVnkWplGgH5Nn8Pw185H4bUtA5s0DmsckKiMwCjsmXeUHdTs4TRGaPlAqHmXgwVOsngQZ9XZgnjRlXYuC7rg3yw0t7nSL07ZLe5+6iUH/fXx70eA/rFtfq7tht5f8CQgTLYqc3PXfAcN02qEWSZMIZsu80j8ceBNuDlyQHVdrbvc1qEGfcoxdh2P+CDHkYl/K3KFAVbzE8JfyY810sfNmVJs70V1CtpQnUuZmQZpS9Q056hvC4bHyDNj14tEv1hWWB0QvM5uBL+EIFuZPlj3kwY5n3or4oX0r77grhui3YCwlX99vqFUIRd7MUKLZmazlfQSnzacIxRzvK9HMZRE7rC0zXakdW+gC1BDL1rsZm8h8n+W+2xKsfLAzZTN7ZkPtoS1/901o6ViTygNUfpcP0j7/zZU5Kcvde5mSO4DvcvKK2GaI/AtnIQyohd/WuEMShEPJuHvzyZQiRE76E5ZOVUpSayt8qgqCmjm+Cn/I20Lz7G/ey0nImp8yGA+wFArei6UAkIsDKDuphpmFVNdQWMqI99/X00ghnZLJMm6SnbxgqZLULqHi+kci4n+5PVb3LVQYW0JUlIksDkX3Yxil7EezO1eM8SFvb+MzZWmPdiJqb7+9HNxIMObch+TYLsogzZZAAh9xU3nhiJuj3rTjYhRGzQvtR/O1VR1EhM6uZvG9l7tytRjdB3QhG0B3IDY6lsNmlwg0qStKALXTHUhEh5cOdwm/jWYSCtb/O2CTWVBlhNV3j8F57Ms6d2PIN6NqFHr8rx3m8yf/glVB3H0rwRABqzhXMXpsbvb+xMsb+AELR+y/+WN+WNsQRzHecrrveAj1RAn3P0F+UiZcLJE7i/lHqdc4Q1HrD6usyfI0TqK/MdmviuLxjQHSkmyGzKsIDMYRtyYLJp+hNerAo6PB/gAAA'
+];
+
+const choreTasks = [
+  { id: "bed", title: "Make bed", image: chorePictures[0] },
+  { id: "dress", title: "Get dressed", image: chorePictures[1] },
+  { id: "am-teeth", title: "Brush teeth (morning)", image: chorePictures[2] },
+  { id: "bag", title: "Unload school bag", image: chorePictures[3], weekdaysOnly: true },
+  { id: "pm-teeth", title: "Brush teeth (bedtime)", image: chorePictures[4] }
+];
+
+// Google Calendar is embedded directly above. No OAuth credentials needed.
+// Calendar must be publicly visible in Google Calendar settings.
+
+// Use YYYY-MM-DD for each special date.
+const specialDates = [
+  { title: "Halloween", date: "2026-10-31", picture: "🎃" },
+  { title: "Christmas", date: "2026-12-25", picture: "🎄" },
+  { title: "Léo’s Birthday", date: "2026-11-11", picture: "🎂" },
+  { title: "Ollie’s Birthday", date: "2027-04-04", picture: "🎈" }
+  // Add more: { title: "Birthday", date: "2027-03-15", picture: "🎂" },
+  // Or use a local image: { title: "Vacation", date: "2027-07-01", image: "images/beach.png" }
+];
+
+function getSaved(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch (_) {
+    return fallback;
+  }
+}
+
+function save(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (_) {}
+}
+
+function localDayKey() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+function choresStorageKey() { return "family-chores-v2-" + localDayKey(); }
+function isWeekday() { const day = new Date().getDay(); return day >= 1 && day <= 5; }
+function renderKidsChores() {
+  const state = getSaved(choresStorageKey(), {});
+  let total = 0, done = 0;
+  [{id:"ollie",name:"Ollie",cls:"ollie"},{id:"leo",name:"Léo",cls:"leo"}].forEach(kid => {
+    const root = document.getElementById(kid.id + "-chores");
+    root.innerHTML = "";
+    const panel = document.createElement("section");
+    panel.className = "kid-panel " + kid.cls;
+    const heading = document.createElement("div"); heading.className = "kid-heading";
+    const name = document.createElement("h3"); name.textContent = kid.name;
+    const score = document.createElement("strong");
+    heading.append(name,score);panel.appendChild(heading);
+    const grid = document.createElement("div"); grid.className = "task-grid";
+    let kidTotal=0,kidDone=0;
+    choreTasks.forEach(task => {
+      const enabled = !task.weekdaysOnly || isWeekday();
+      const key = kid.id + ":" + task.id;
+      const checked = !!state[key] && enabled;
+      const tile = document.createElement("label");
+      tile.className = "task-tile" + (checked ? " completed" : "") + (!enabled ? " disabled" : "");
+      const pic = document.createElement("img");pic.src = task.image;pic.alt = task.title;
+      const label = document.createElement("span");label.textContent = task.title;
+      const check = document.createElement("input");check.type="checkbox";check.checked=checked;check.disabled=!enabled;
+      check.setAttribute("aria-label",kid.name+": "+task.title);
+      check.addEventListener("change",()=>{
+        const updated=getSaved(choresStorageKey(),{});updated[key]=check.checked;
+        save(choresStorageKey(),updated);renderKidsChores();
+      });
+      tile.append(pic,label,check);grid.appendChild(tile);
+      if(enabled){total++;kidTotal++;if(checked){done++;kidDone++;}}
+    });
+    score.textContent=kidDone+" / "+kidTotal+" done";
+    panel.appendChild(grid);root.appendChild(panel);
+    document.getElementById(kid.id + "-progress").textContent = kidDone + " of " + kidTotal + " done";
+  });
+
+}
+function resetTodaysChores() { save(choresStorageKey(),{});renderKidsChores(); }
+
+function renderCountdowns() {
+  const container = document.getElementById("countdown-list");
+  container.innerHTML = "";
+  const now = new Date();
+  const today = Date.UTC(
+    now.getFullYear(), now.getMonth(), now.getDate()
+  );
+
+  const upcoming = specialDates.map(item => {
+    const parts = item.date.split("-").map(Number);
+    // Repeat annually, and always use the next upcoming occurrence.
+    let target = Date.UTC(now.getFullYear(), parts[1] - 1, parts[2]);
+    if (target < today) {
+      target = Date.UTC(now.getFullYear() + 1, parts[1] - 1, parts[2]);
+    }
+    return { item, days: Math.round((target - today) / 86400000) };
+  }).filter(event => event.days <= 90)
+    .sort((a, b) => a.days - b.days || a.item.title.localeCompare(b.item.title));
+
+  if (upcoming.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "muted";
+    empty.textContent = "Nothing coming up in the next 90 days 🎉";
+    container.appendChild(empty);
+  }
+
+  upcoming.forEach(({ item, days }) => {
+
+    const row = document.createElement("div");
+    row.className = "countdown-row";
+    const picture = document.createElement("div");
+    picture.className = "countdown-picture";
+    picture.setAttribute("role", "img");
+    picture.setAttribute("aria-label", item.title);
+    if (item.image) {
+      const img = document.createElement("img");
+      img.src = item.image;
+      img.alt = "";
+      img.style.cssText = "width:100%;height:100%;object-fit:contain;border-radius:16px";
+      img.onerror = () => { picture.textContent = item.picture || "🎉"; };
+      picture.appendChild(img);
+    } else {
+      picture.textContent = item.picture || "🎉";
+    }
+    const details = document.createElement("div");
+    details.className = "countdown-details";
+    const name = document.createElement("strong");
+    name.className = "countdown-name";
+    name.textContent = item.title;
+    const remaining = document.createElement("div");
+    remaining.className = "countdown-days";
+    remaining.textContent = days === 0
+      ? "Today! 🎉"
+      : days + (days === 1 ? " day to go" : " days to go");
+
+    const dateLabel=document.createElement("div");dateLabel.className="countdown-date";
+    const p=item.date.split("-").map(Number);
+    dateLabel.textContent=new Date(2026,p[1]-1,p[2]).toLocaleDateString("en-CA",{month:"long",day:"numeric"});
+    details.append(name,dateLabel);
+    const daysBadge=document.createElement("div");daysBadge.className="days-badge";daysBadge.appendChild(remaining);
+    row.append(picture, details, daysBadge);
+    container.appendChild(row);
+  });
+}
+
+function updateClock() {
+  const now = new Date();
+  document.getElementById("today").textContent =
+    now.toLocaleDateString(undefined, {
+      weekday: "long", month: "long", day: "numeric"
+    });
+  document.getElementById("clock").textContent =
+    now.toLocaleTimeString(undefined, {
+      hour: "numeric", minute: "2-digit"
+    });
+}
+
+let detailedWeather = null;
+async function loadWeather() {
+  // Calgary example coordinates. Change these to your location.
+  const latitude = 51.0447;
+  const longitude = -114.0719;
+
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast"
+      + "?latitude=" + latitude
+      + "&longitude=" + longitude
+      + "&current=temperature_2m,weather_code"
+      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,precipitation_sum"
+      + "&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m"
+      + "&timezone=America%2FEdmonton&forecast_days=5";
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Weather unavailable");
+    const data = await response.json();
+
+    detailedWeather = data;
+    renderForecast(data.daily);
+    document.getElementById("current-temp").textContent = Math.round(data.current.temperature_2m) + "°";
+  } catch (_) {
+    document.getElementById("forecast-days").textContent =
+      "Forecast unavailable — check your internet connection.";
+  }
+}
+
+function renderForecast(daily) {
+  const root = document.getElementById("forecast-days");
+  root.innerHTML = "";
+  if (!daily || !daily.time || !daily.time.length) {
+    root.textContent = "Forecast unavailable";
+    return;
+  }
+  daily.time.slice(0, 5).forEach((dateString, i) => {
+    const day = document.createElement("button");
+    day.type = "button";
+    day.className = "forecast-day";
+    day.setAttribute("aria-label", "Detailed forecast for " + dateString);
+    day.addEventListener("click", function(){ openWeatherDetail(i); });
+    const name = document.createElement("div");
+    name.className = "small";
+    name.style.fontWeight = "700";
+    // Noon avoids date rollover from UTC offsets on older iPads.
+    name.textContent = i === 0 ? "Today" :
+      new Date(dateString + "T12:00:00").toLocaleDateString("en-CA", { weekday:"short" });
+    const icon = document.createElement("div");
+    icon.className = "forecast-icon";
+    icon.textContent = weatherEmoji(daily.weather_code[i]);
+    const temps = document.createElement("div");
+    temps.className = "forecast-temps";
+    temps.textContent = Math.round(daily.temperature_2m_max[i]) + "° / " +
+      Math.round(daily.temperature_2m_min[i]) + "°";
+    const rain = document.createElement("div");
+    rain.className = "forecast-rain";
+    const chance = daily.precipitation_probability_max && daily.precipitation_probability_max[i];
+    rain.textContent = Number.isFinite(chance) ? "💧 " + Math.round(chance) + "%" : " ";
+    day.appendChild(name); day.appendChild(icon); day.appendChild(temps); day.appendChild(rain);
+    root.appendChild(day);
+  });
+}
+
+
+function openWeatherDetail(i) {
+  if (!detailedWeather || !detailedWeather.daily) return;
+  const d = detailedWeather.daily;
+  const date = d.time[i];
+  const readable = new Date(date + "T12:00:00").toLocaleDateString("en-CA", {weekday:"long",month:"long",day:"numeric"});
+  document.getElementById("detail-title").textContent = weatherEmoji(d.weather_code[i]) + " " + readable;
+  const content = document.getElementById("detail-content");
+  content.textContent = "";
+  const summary = document.createElement("div");
+  summary.className = "weather-summary";
+  summary.textContent = weatherDescription(d.weather_code[i]);
+  content.appendChild(summary);
+  const stats = document.createElement("div"); stats.className = "weather-stats";
+  const chance = d.precipitation_probability_max && d.precipitation_probability_max[i];
+  const sunrise = d.sunrise && d.sunrise[i] ? d.sunrise[i].slice(11,16) : "—";
+  const sunset = d.sunset && d.sunset[i] ? d.sunset[i].slice(11,16) : "—";
+  const values = [
+    ["🌡️ High / Low", Math.round(d.temperature_2m_max[i]) + "° / " + Math.round(d.temperature_2m_min[i]) + "°"],
+    ["💧 Precipitation chance", Number.isFinite(chance) ? Math.round(chance) + "%" : "—"],
+    ["🌧️ Total precipitation", Number.isFinite(d.precipitation_sum[i]) ? d.precipitation_sum[i].toFixed(1) + " mm" : "—"],
+    ["🌅 Sunrise", sunrise], ["🌇 Sunset", sunset]
+  ];
+  values.forEach(function(pair){
+    const el=document.createElement("div"); el.className="weather-stat";
+    const label=document.createElement("div");label.textContent=pair[0];
+    const val=document.createElement("strong");val.textContent=pair[1];
+    el.appendChild(label);el.appendChild(val);stats.appendChild(el);
+  });
+  content.appendChild(stats);
+  const heading=document.createElement("div");
+  heading.className="hourly-heading";
+  heading.textContent="Temperature throughout the day";
+  content.appendChild(heading);
+
+  const h=detailedWeather.hourly;
+  const points=[];
+  if(h && h.time && h.temperature_2m){
+    h.time.forEach(function(timestamp,j){
+      if(timestamp.slice(0,10)===date && Number.isFinite(h.temperature_2m[j])){
+        points.push({hour:Number(timestamp.slice(11,13)),temp:h.temperature_2m[j]});
+      }
+    });
+  }
+  if(points.length>1){
+    const svgNS="http://www.w3.org/2000/svg";
+    const width=640,height=220,left=43,right=18,top=25,bottom=39;
+    const plotW=width-left-right,plotH=height-top-bottom;
+    const values=points.map(function(p){return p.temp;});
+    let min=Math.floor(Math.min.apply(null,values)-2);
+    let max=Math.ceil(Math.max.apply(null,values)+2);
+    if(max<=min)max=min+4;
+    const x=function(hour){return left+hour/23*plotW;};
+    const y=function(temp){return top+(max-temp)/(max-min)*plotH;};
+    const svg=document.createElementNS(svgNS,"svg");
+    svg.setAttribute("viewBox","0 0 "+width+" "+height);
+    svg.setAttribute("role","img");
+    svg.setAttribute("aria-label","Hourly temperature line chart for "+readable);
+    svg.classList.add("temperature-chart");
+    function el(tag,attrs,text){
+      const node=document.createElementNS(svgNS,tag);
+      Object.keys(attrs).forEach(function(k){node.setAttribute(k,attrs[k]);});
+      if(text!==undefined)node.textContent=text;
+      svg.appendChild(node);
+      return node;
+    }
+    [0,1,2,3,4].forEach(function(k){
+      const temp=min+(max-min)*k/4;
+      const yy=y(temp);
+      el("line",{x1:left,y1:yy,x2:width-right,y2:yy,stroke:"#cfe2f1","stroke-width":"1","stroke-dasharray":"4 5"});
+      el("text",{x:left-8,y:yy+4,"text-anchor":"end",fill:"#466784","font-size":"13"},Math.round(temp)+"°");
+    });
+    [0,6,12,18,23].forEach(function(hour){
+      el("text",{x:x(hour),y:height-13,"text-anchor":hour===0?"start":hour===23?"end":"middle",fill:"#466784","font-size":"14"},
+        hour===0?"12 AM":hour===12?"12 PM":hour<12?hour+" AM":(hour-12)+" PM");
+    });
+    const path=points.map(function(p,i){return (i?"L":"M")+x(p.hour).toFixed(1)+" "+y(p.temp).toFixed(1);}).join(" ");
+    el("path",{d:path,fill:"none",stroke:"#167cc5","stroke-width":"4","stroke-linecap":"round","stroke-linejoin":"round"});
+    [0,6,12,18,23].forEach(function(hour){
+      const p=points.find(function(v){return v.hour===hour;});
+      if(!p)return;
+      el("circle",{cx:x(hour),cy:y(p.temp),r:"5",fill:"#fff",stroke:"#167cc5","stroke-width":"3"});
+      el("text",{x:x(hour),y:y(p.temp)-12,"text-anchor":"middle",fill:"#12335a","font-size":"15","font-weight":"bold"},Math.round(p.temp)+"°");
+    });
+    content.appendChild(svg);
+  }else{
+    const msg=document.createElement("p");
+    msg.textContent="Hourly temperatures are unavailable for this day.";
+    content.appendChild(msg);
+  }
+  document.getElementById("weather-overlay").hidden=false;
+  document.getElementById("weather-close").focus();
+}
+function closeWeatherDetail(){document.getElementById("weather-overlay").hidden=true;}
+document.getElementById("weather-close").addEventListener("click",closeWeatherDetail);
+document.getElementById("weather-overlay").addEventListener("click",function(e){if(e.target===this)closeWeatherDetail();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeWeatherDetail();});
+
+function weatherDescription(code) {
+  if (code === 0) return "Clear sky";
+  if ([1, 2].includes(code)) return "Partly cloudy";
+  if (code === 3) return "Overcast";
+  if ([45, 48].includes(code)) return "Foggy";
+  if ([51, 53, 55, 56, 57].includes(code)) return "Drizzle";
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code))
+    return "Rain";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "Snow";
+  if ([95, 96, 99].includes(code)) return "Thunderstorms";
+  return "Current conditions";
+}
+
+function weatherEmoji(code) {
+  if (code === 0) return "☀️";
+  if ([1, 2, 3].includes(code)) return "🌤️";
+  if ([45, 48].includes(code)) return "🌫️";
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return "❄️";
+  if ([95, 96, 99].includes(code)) return "⛈️";
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]
+      .includes(code)) return "🌧️";
+  return "🌥️";
+}
+
+function renderAll() {
+  renderKidsChores();
+  renderCountdowns();
+  updateClock();
+}
+
+
+// Events are synchronized from the public Google Calendar by GitHub Actions.
+// This avoids Google's iframe cookie banner on older iPads.
+function eventPicture(title) {
+  const t = title.toLowerCase();
+  if (/birthday|party|anniversaire/.test(t)) return "🎂";
+  if (/school|class|teacher|école/.test(t)) return "🚌";
+  if (/hockey/.test(t)) return "🏒";
+  if (/soccer|football/.test(t)) return "⚽";
+  if (/swim|pool/.test(t)) return "🏊";
+  if (/squash|tennis/.test(t)) return "🎾";
+  if (/dentist|doctor|appointment/.test(t)) return "🩺";
+  if (/trip|flight|vacation|travel/.test(t)) return "✈️";
+  if (/camp/.test(t)) return "🏕️";
+  if (/dinner|restaurant|lunch/.test(t)) return "🍽️";
+  if (/christmas/.test(t)) return "🎄";
+  if (/halloween/.test(t)) return "🎃";
+  return "⭐";
+}
+const calendarTZ = "America/Edmonton";
+let calendarDayOffset = 0;
+let savedCalendarEvents = [];
+
+function calDayKey(date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year:"numeric",month:"2-digit",day:"2-digit",timeZone:calendarTZ
+  }).formatToParts(date);
+  const value = type => parts.find(p=>p.type===type).value;
+  return value("year")+"-"+value("month")+"-"+value("day");
+}
+function calSelectedDate() {
+  // Noon UTC avoids DST-related midnight changes in Calgary.
+  const todayParts = new Intl.DateTimeFormat("en-US", {
+    year:"numeric",month:"numeric",day:"numeric",timeZone:calendarTZ
+  }).formatToParts(new Date());
+  const part = name => Number(todayParts.find(p => p.type === name).value);
+  const d = new Date(Date.UTC(part("year"),part("month")-1,part("day"),12));
+  d.setUTCDate(d.getUTCDate()+calendarDayOffset);
+  return d;
+}
+function calKeyForSelected() {
+  const d = calSelectedDate();
+  return [d.getUTCFullYear(),String(d.getUTCMonth()+1).padStart(2,"0"),String(d.getUTCDate()).padStart(2,"0")].join("-");
+}
+function renderCalendarEvents(events) {
+  savedCalendarEvents = events;
+  const root = document.getElementById("family-calendar");
+  root.innerHTML = "";
+  const selected = calSelectedDate();
+  const selectedKey = calKeyForSelected();
+  const label = calendarDayOffset === 0 ? "Today" :
+    selected.toLocaleDateString("en-CA",{weekday:"short",month:"short",day:"numeric",timeZone:"UTC"});
+  document.getElementById("calendar-selected-day").textContent = label;
+
+  const dayEvents = events.filter(e => {
+    if (!e.start) return false;
+    const first = calDayKey(new Date(e.start));
+    const last = e.end ? calDayKey(new Date(new Date(e.end).getTime()-1)) : first;
+    return first <= selectedKey && last >= selectedKey;
+  }).sort((a,b) => new Date(a.start)-new Date(b.start));
+
+  if (!dayEvents.length) {
+    const msg = document.createElement("p");
+    msg.className = "calendar-empty";
+    msg.textContent = "No events for this day ✨  Swipe left for the next day.";
+    root.appendChild(msg);
+    return;
+  }
+  dayEvents.slice(0,7).forEach(e => {
+    const row = document.createElement("div"); row.className = "calendar-event";
+    const icon = document.createElement("span"); icon.className="calendar-event-icon"; icon.textContent=eventPicture(e.title || "Event");
+    const detail=document.createElement("div"); detail.className="calendar-event-detail";
+    const name=document.createElement("strong"); name.textContent=e.title || "Untitled event";
+    const when=document.createElement("span"); when.className="calendar-when";
+    const start=new Date(e.start);
+    const time=e.all_day ? "All day" : start.toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit",timeZone:calendarTZ});
+    const timeLabel=document.createElement("span"); timeLabel.className="event-time"; timeLabel.textContent=time;
+    when.appendChild(timeLabel);
+    detail.appendChild(name);detail.appendChild(when);
+    row.appendChild(icon);row.appendChild(detail);root.appendChild(row);
+  });
+}
+function changeCalendarDay(delta) {
+  calendarDayOffset += delta;
+  renderCalendarEvents(savedCalendarEvents);
+}
+document.getElementById("calendar-prev").addEventListener("click",()=>changeCalendarDay(-1));
+document.getElementById("calendar-next").addEventListener("click",()=>changeCalendarDay(1));
+document.getElementById("calendar-today").addEventListener("click",()=>{
+  calendarDayOffset=0;renderCalendarEvents(savedCalendarEvents);
+});
+const calendarSwipeArea = document.querySelector(".agenda");
+let swipeStartX=0, swipeStartY=0;
+calendarSwipeArea.addEventListener("touchstart", e => {
+  if(e.touches.length!==1)return;
+  swipeStartX=e.touches[0].clientX;
+  swipeStartY=e.touches[0].clientY;
+},{passive:true});
+calendarSwipeArea.addEventListener("touchend", e => {
+  if(!e.changedTouches.length)return;
+  const dx=e.changedTouches[0].clientX-swipeStartX;
+  const dy=e.changedTouches[0].clientY-swipeStartY;
+  if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4) changeCalendarDay(dx<0?1:-1);
+},{passive:true});
+async function loadCalendar() {
+  try {
+    const response=await fetch("calendar-events.json?refresh="+Math.floor(Date.now()/300000),{cache:"no-store"});
+    if(!response.ok) throw new Error("Not synchronized yet");
+    const data=await response.json();renderCalendarEvents(data.events || []);
+  } catch(e) {
+    document.getElementById("family-calendar").textContent="Calendar setup needed — enable the included GitHub Action.";
+  }
+}
+renderAll();
+loadWeather();
+loadCalendar();
+setInterval(loadCalendar, 5 * 60 * 1000);
+setInterval(updateClock, 30000);
+setInterval(loadWeather, 30 * 60 * 1000);
+// A midnight refresh keeps the displayed date range current.
+setInterval(function() { renderCountdowns(); renderKidsChores(); renderCalendarEvents(savedCalendarEvents); }, 60 * 1000);
+</script>
+
+</body>
+</html>
