@@ -400,15 +400,32 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 <style id="brownie-points-style">
 .brownie-card{grid-column:1 / -1;background:#fff2df}.brownie-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.brownie-person{background:rgba(255,255,255,.8);border-radius:14px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px}.brownie-count{font-size:clamp(30px,4vw,48px);font-weight:800;line-height:1.1}.brownie-controls{display:flex;align-items:center;gap:12px}.brownie-controls button{font:inherit;font-size:25px;font-weight:700;min-width:52px;min-height:48px;border:0;border-radius:12px;background:#e5eee4;color:#293b32;cursor:pointer;touch-action:manipulation}.brownie-controls button:last-child{background:#d8ebff}.brownie-controls button:disabled{opacity:.35}.brownie-note{font-size:12px;opacity:.7;text-align:center}@media(max-width:480px){.brownie-grid{gap:8px}.brownie-person{padding:9px}.brownie-controls{gap:7px}.brownie-controls button{min-width:44px}}
 </style>
+<style id="compact-header-brownies">
+.family-heading.brownie-heading{padding:5px 9px!important;display:flex;flex-direction:column;justify-content:center;gap:3px;min-height:0}
+.family-heading.brownie-heading:before,.family-heading.brownie-heading:after{display:none!important;content:none!important}
+.brownie-heading .header-date{display:flex;align-items:center;justify-content:space-between;gap:5px;flex-wrap:wrap}
+.brownie-heading .header-date p{font-size:clamp(10px,1.1vw,14px);margin:0}
+.brownie-heading .brownie-card{background:transparent!important;padding:0;margin:0;border:0;box-shadow:none}
+.brownie-heading .brownie-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.brownie-heading .brownie-person{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:3px 6px;padding:3px 4px;border-radius:8px;min-width:0}
+.brownie-heading .brownie-person strong{font-size:clamp(11px,1.2vw,15px)}
+.brownie-heading .brownie-count{font-size:clamp(17px,2vw,26px);line-height:1}
+.brownie-heading .brownie-controls{gap:4px}
+.brownie-heading .brownie-controls button{min-width:32px;min-height:32px;padding:0 6px;font-size:20px;border-radius:7px}
+@media(max-width:699px){.brownie-heading .brownie-person{justify-content:space-between}}
+</style>
 </head>
 <body>
 <main>
   <header class="topbar">
-    <div class="family-heading">
-      <h1>⚡ Our Family <span class="pokeball">◉</span></h1>
-      <p id="today" class="muted">Family HQ</p>
-      <p id="clock" class="muted"></p>
-    </div>
+    <div class="family-heading brownie-heading"><div class="header-date"><p id="today" class="muted">Family HQ</p><p id="clock" class="muted"></p></div><section class="brownie-card" aria-label="Brownie points tracker">
+
+<div class="brownie-grid">
+<div class="brownie-person"><strong>🟠 Léo</strong><span class="brownie-count" id="brownie-leo">0</span><div class="brownie-controls"><button type="button" data-brownie="leo" data-change="-1" aria-label="Remove one point from Léo">−</button><button type="button" data-brownie="leo" data-change="1" aria-label="Add one point to Léo">+</button></div></div>
+<div class="brownie-person"><strong>🔵 Ollie</strong><span class="brownie-count" id="brownie-ollie">0</span><div class="brownie-controls"><button type="button" data-brownie="ollie" data-change="-1" aria-label="Remove one point from Ollie">−</button><button type="button" data-brownie="ollie" data-change="1" aria-label="Add one point to Ollie">+</button></div></div>
+</div>
+</section>
+</div>
     <section class="forecast" aria-label="Five-day Calgary weather forecast">
       <div class="forecast-label">🌤️ Calgary <strong id="current-temp">--°</strong> · 5-day forecast</div>
       <div id="forecast-days" class="forecast-days"><p class="muted small">Loading forecast…</p></div>
@@ -443,13 +460,6 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
       <p id="leo-progress" class="small"></p>
     </section>
     
-<section class="card brownie-card" aria-label="Brownie points tracker">
-<h2>⭐ Brownie Points</h2>
-<div class="brownie-grid">
-<div class="brownie-person"><strong>🟠 Léo</strong><span class="brownie-count" id="brownie-leo">0</span><div class="brownie-controls"><button type="button" data-brownie="leo" data-change="-1" aria-label="Remove one point from Léo">−</button><button type="button" data-brownie="leo" data-change="1" aria-label="Add one point to Léo">+</button></div></div>
-<div class="brownie-person"><strong>🔵 Ollie</strong><span class="brownie-count" id="brownie-ollie">0</span><div class="brownie-controls"><button type="button" data-brownie="ollie" data-change="-1" aria-label="Remove one point from Ollie">−</button><button type="button" data-brownie="ollie" data-change="1" aria-label="Add one point to Ollie">+</button></div></div>
-</div><p class="brownie-note">Points are saved on this device and do not reset each day.</p>
-</section>
 <section class="card bonus-card" aria-label="Bonus missions">
       <h2>🎲 Bonus Missions</h2>
       <div class="bonus-players">
