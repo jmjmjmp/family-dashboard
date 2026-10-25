@@ -361,6 +361,23 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 .calendar-empty {padding:18px 10px;color:#56718a;font-weight:700;text-align:left}
 @media(max-width:850px){.calendar-header h2{font-size:clamp(16px,2.4vw,23px)}.calendar-nav button{height:28px;min-width:28px}}
 
+.weather-detail{background:#202124;border:3px solid #427c9b;color:#f1f3f6;max-width:760px}
+.weather-detail h2{color:#fff}
+.weather-summary{color:#c8d3dd}
+.weather-stat{background:#30363d;color:#dfe7ef}
+.weather-stat strong{color:#fff}
+.weather-close{background:#424a53}
+.temperature-chart{display:block;width:100%;height:auto;max-height:340px;background:#202124;border-radius:12px;margin-top:10px}
+@media (orientation:landscape){.weather-detail{max-height:94vh;padding:10px 15px}.weather-stats{margin-bottom:4px}.weather-stat{padding:5px}.temperature-chart{max-height:43vh}}
+
+/* Short Pokémon celebration shown only when a chore is checked */
+.chore-celebration[hidden]{display:none!important}
+.chore-celebration{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(11,29,54,.36);pointer-events:none}
+.chore-celebration-card{background:#fff9db;border:5px solid #ffcc30;border-radius:26px;padding:12px 20px 16px;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.35);animation:chorePop .22s ease-out;max-width:85vw}
+.chore-celebration-card img{display:block;width:min(220px,42vw);height:auto;margin:auto;border-radius:18px}
+.chore-celebration-card strong{display:block;color:#183c69;font-size:clamp(24px,4vw,42px);line-height:1.2}
+.chore-celebration-card span{display:block;color:#345577;font-size:clamp(14px,2vw,20px)}
+@keyframes chorePop{from{transform:scale(.65);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -412,6 +429,13 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
       <div id="detail-content"></div>
     </div>
   </div>
+<div id="chore-celebration" class="chore-celebration" hidden aria-live="polite">
+  <div class="chore-celebration-card">
+    <img id="chore-celebration-gif" src="pokemon_good_job.gif" alt="Pikachu celebrating">
+    <strong id="chore-celebration-title">Great job!</strong>
+    <span>⭐ You did it! ⭐</span>
+  </div>
+</div>
   <button class="reset-button" onclick="resetTodaysChores()">Reset today's chores</button>
 </main>
 
@@ -464,6 +488,17 @@ function localDayKey() {
   const d = new Date();
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
+let choreCelebrationTimeout;
+function celebrateChore(kidName){
+  const layer=document.getElementById("chore-celebration");
+  const gif=document.getElementById("chore-celebration-gif");
+  document.getElementById("chore-celebration-title").textContent="Great job, "+kidName+"!";
+  // Reload GIF so its animation starts at the first frame every time.
+  gif.src="pokemon_good_job.gif?play="+Date.now();
+  layer.hidden=false;
+  clearTimeout(choreCelebrationTimeout);
+  choreCelebrationTimeout=setTimeout(function(){layer.hidden=true;},2200);
+}
 function choresStorageKey() { return "family-chores-v2-" + localDayKey(); }
 function isWeekday() { const day = new Date().getDay(); return day >= 1 && day <= 5; }
 function renderKidsChores() {
@@ -493,6 +528,7 @@ function renderKidsChores() {
       check.addEventListener("change",()=>{
         const updated=getSaved(choresStorageKey(),{});updated[key]=check.checked;
         save(choresStorageKey(),updated);renderKidsChores();
+        if(check.checked)celebrateChore(kid.name);
       });
       tile.append(pic,label,check);grid.appendChild(tile);
       if(enabled){total++;kidTotal++;if(checked){done++;kidDone++;}}
@@ -675,25 +711,70 @@ function openWeatherDetail(i) {
     el.appendChild(label);el.appendChild(val);stats.appendChild(el);
   });
   content.appendChild(stats);
-  const heading=document.createElement("div");heading.className="hourly-heading";heading.textContent="Hourly outlook";content.appendChild(heading);
-  const hours=document.createElement("div");hours.className="hourly-grid";
   const h=detailedWeather.hourly;
-  if(h && h.time){
-    h.time.forEach(function(timestamp,j){
-      if(timestamp.slice(0,10)!==date || j%2!==0) return;
-      const el=document.createElement("div");el.className="hourly-cell";
-      const hour=timestamp.slice(11,13);
-      const display=((Number(hour)+11)%12+1)+(Number(hour)<12?" AM":" PM");
-      const wind=h.wind_speed_10m[j];
-      el.textContent=display;
-      const icon=document.createElement("div");icon.style.fontSize="23px";icon.textContent=weatherEmoji(h.weather_code[j]);el.appendChild(icon);
-      const temp=document.createElement("b");temp.textContent=Math.round(h.temperature_2m[j])+"°";el.appendChild(temp);
-      const precip=document.createElement("div");precip.textContent="💧 "+Math.round(h.precipitation_probability[j])+"%";el.appendChild(precip);
-      const w=document.createElement("div");w.textContent="💨 "+Math.round(wind)+" km/h";el.appendChild(w);
-      hours.appendChild(el);
+  const points=[];
+  if(h && h.time && h.temperature_2m){
+    h.time.forEach(function(t,j){
+      if(t.slice(0,10)===date && Number.isFinite(h.temperature_2m[j])){
+        points.push({hour:Number(t.slice(11,13)),temp:h.temperature_2m[j],
+          code:h.weather_code?h.weather_code[j]:0});
+      }
     });
   }
-  content.appendChild(hours);
+  if(points.length>1){
+    const ns="http://www.w3.org/2000/svg";
+    const W=740,H=320,L=32,R=66,T=55,B=43;
+    const min=Math.floor((Math.min.apply(null,points.map(p=>p.temp))-3)/3)*3;
+    const max=Math.ceil((Math.max.apply(null,points.map(p=>p.temp))+3)/3)*3;
+    const x=hour=>L+hour/23*(W-L-R);
+    const y=temp=>T+(max-temp)/(max-min)*(H-T-B);
+    const svg=document.createElementNS(ns,"svg");
+    svg.setAttribute("viewBox","0 0 "+W+" "+H);
+    svg.setAttribute("role","img");
+    svg.setAttribute("aria-label","Hourly temperature chart for "+readable);
+    svg.classList.add("temperature-chart");
+    function el(tag,attrs,text,parent){
+      const node=document.createElementNS(ns,tag);
+      Object.keys(attrs).forEach(k=>node.setAttribute(k,attrs[k]));
+      if(text!==undefined)node.textContent=text;
+      (parent||svg).appendChild(node);
+      return node;
+    }
+    const defs=el("defs",{});
+    const grad=el("linearGradient",{id:"weather-fill",x1:"0",y1:"0",x2:"0",y2:"1"},undefined,defs);
+    el("stop",{offset:"0%","stop-color":"#48b9ee","stop-opacity":"0.47"},undefined,grad);
+    el("stop",{offset:"100%","stop-color":"#173c67","stop-opacity":"0.36"},undefined,grad);
+    for(let k=0;k<=5;k++){
+      const temp=min+(max-min)*k/5,yy=y(temp);
+      el("line",{x1:L,y1:yy,x2:W-R+4,y2:yy,stroke:"#454b52","stroke-width":"1"});
+      el("text",{x:W-R+18,y:yy+6,fill:"#c2c5cc","font-size":"18"},Math.round(temp)+"°");
+    }
+    [0,6,12,18,23].forEach(hour=>{
+      el("line",{x1:x(hour),y1:T,x2:x(hour),y2:H-B+5,stroke:"#393d43","stroke-width":"1","stroke-dasharray":"4 5"});
+      el("text",{x:x(hour),y:H-13,"text-anchor":hour===0?"start":hour===23?"end":"middle",fill:"#a5a7ac","font-size":"17"},
+        hour===0?"12AM":hour===12?"12PM":hour<12?hour+"AM":(hour-12)+"PM");
+    });
+    const dline=points.map((p,i)=>(i?"L":"M")+x(p.hour).toFixed(1)+","+y(p.temp).toFixed(1)).join(" ");
+    const area=dline+" L"+x(points[points.length-1].hour)+","+(H-B)+" L"+x(points[0].hour)+","+(H-B)+" Z";
+    el("path",{d:area,fill:"url(#weather-fill)"});
+    el("path",{d:dline,fill:"none",stroke:"#48b8e9","stroke-width":"5","stroke-linecap":"round","stroke-linejoin":"round"});
+    const lo=points.reduce((a,b)=>b.temp<a.temp?b:a);
+    const hi=points.reduce((a,b)=>b.temp>a.temp?b:a);
+    [lo,hi].forEach((p,i)=>{
+      el("circle",{cx:x(p.hour),cy:y(p.temp),r:"8",fill:"#1b2025",stroke:"#62d1ff","stroke-width":"4"});
+      el("text",{x:x(p.hour),y:y(p.temp)-17,"text-anchor":"middle",fill:"#f2f5f9","font-size":"18","font-weight":"bold"},
+        (i?"H ":"L ")+Math.round(p.temp)+"°");
+    });
+    [0,3,6,9,12,15,18,21,23].forEach(hour=>{
+      const p=points.find(q=>q.hour===hour);
+      if(p)el("text",{x:x(hour),y:32,"text-anchor":"middle","font-size":"24",fill:"#e0e5ed"},weatherEmoji(p.code));
+    });
+    content.appendChild(svg);
+  }else{
+    const msg=document.createElement("p");
+    msg.textContent="Hourly temperatures are unavailable for this day.";
+    content.appendChild(msg);
+  }
   document.getElementById("weather-overlay").hidden=false;
   document.getElementById("weather-close").focus();
 }
