@@ -318,6 +318,24 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 @media (orientation:portrait){html,body{overflow:auto}main{height:auto;min-height:100vh;overflow:visible}.topbar{grid-template-columns:1fr;flex-basis:auto}.family-heading{min-height:90px}.dashboard-grid{display:flex;flex-direction:column}.dashboard-grid>.card{min-height:200px}.kid-card{display:block}.kid-card>div{height:120px}.task-tile{grid-template-columns:1fr;text-align:center}.task-tile img{height:45px}}
 
 .countdown-date{font-size:clamp(11px,1.2vw,17px);color:#6e7480;margin-top:3px}.days-badge{background:#d8edff;border-radius:13px;padding:5px 9px;text-align:center;min-width:65px}.countdown-row:nth-child(3n+1) .days-badge{background:#ffe4c4}.countdown-row:nth-child(3n) .days-badge{background:#dcf3d4}
+
+/* Tap a forecast day to see details without changing dashboard dimensions. */
+.forecast-day{cursor:pointer;border:1px solid transparent;font:inherit;color:inherit;touch-action:manipulation}
+.forecast-day:focus{outline:2px solid #126cb4;outline-offset:-2px}
+.weather-overlay[hidden]{display:none!important}
+.weather-overlay{position:fixed;inset:0;z-index:1000;background:#092e52a8;display:flex;align-items:center;justify-content:center;padding:18px}
+.weather-detail{position:relative;width:min(690px,96vw);max-height:88vh;overflow:auto;background:linear-gradient(145deg,#e3f7ff,#fff9df);border:4px solid #2387c0;border-radius:24px;box-shadow:0 14px 45px #001e43aa;padding:18px 20px;color:#12335a}
+.weather-detail h2{font-size:clamp(21px,3vw,30px);margin:0 45px 6px 0}
+.weather-close{position:absolute;top:9px;right:10px;background:#155a8e;color:#fff;border:0;border-radius:14px;font-size:25px;width:44px;height:44px;padding:0;cursor:pointer}
+.weather-summary{font-size:17px;font-weight:700;margin:6px 0 12px}
+.weather-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.weather-stat{background:#fff9;border-radius:12px;padding:9px;text-align:center;font-size:14px}
+.weather-stat strong{display:block;font-size:19px}
+.hourly-heading{font-size:17px;font-weight:800;margin:8px 0}
+.hourly-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.hourly-cell{background:#fff;border-radius:10px;padding:7px 2px;text-align:center;font-size:12px;line-height:1.4}
+.hourly-cell b{display:block;font-size:15px}
+@media(max-width:600px){.weather-detail{padding:12px}.weather-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.hourly-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -353,6 +371,13 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
       <div id="leo-chores"></div>
       <p id="leo-progress" class="small"></p>
     </section>
+  </div>
+  <div class="weather-overlay" id="weather-overlay" hidden role="dialog" aria-modal="true" aria-label="Detailed daily weather forecast">
+    <div class="weather-detail">
+      <button class="weather-close" id="weather-close" aria-label="Close forecast">×</button>
+      <h2 id="detail-title">Weather forecast</h2>
+      <div id="detail-content"></div>
+    </div>
   </div>
   <button class="reset-button" onclick="resetTodaysChores()">Reset today's chores</button>
 </main>
@@ -524,6 +549,7 @@ function updateClock() {
     });
 }
 
+let detailedWeather = null;
 async function loadWeather() {
   // Calgary example coordinates. Change these to your location.
   const latitude = 51.0447;
@@ -534,13 +560,15 @@ async function loadWeather() {
       + "?latitude=" + latitude
       + "&longitude=" + longitude
       + "&current=temperature_2m,weather_code"
-      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max"
+      + "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset,precipitation_sum"
+      + "&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m"
       + "&timezone=America%2FEdmonton&forecast_days=5";
 
     const response = await fetch(url);
     if (!response.ok) throw new Error("Weather unavailable");
     const data = await response.json();
 
+    detailedWeather = data;
     renderForecast(data.daily);
     document.getElementById("current-temp").textContent = Math.round(data.current.temperature_2m) + "°";
   } catch (_) {
@@ -557,8 +585,11 @@ function renderForecast(daily) {
     return;
   }
   daily.time.slice(0, 5).forEach((dateString, i) => {
-    const day = document.createElement("div");
+    const day = document.createElement("button");
+    day.type = "button";
     day.className = "forecast-day";
+    day.setAttribute("aria-label", "Detailed forecast for " + dateString);
+    day.addEventListener("click", function(){ openWeatherDetail(i); });
     const name = document.createElement("div");
     name.className = "small";
     name.style.fontWeight = "700";
@@ -580,6 +611,63 @@ function renderForecast(daily) {
     root.appendChild(day);
   });
 }
+
+
+function openWeatherDetail(i) {
+  if (!detailedWeather || !detailedWeather.daily) return;
+  const d = detailedWeather.daily;
+  const date = d.time[i];
+  const readable = new Date(date + "T12:00:00").toLocaleDateString("en-CA", {weekday:"long",month:"long",day:"numeric"});
+  document.getElementById("detail-title").textContent = weatherEmoji(d.weather_code[i]) + " " + readable;
+  const content = document.getElementById("detail-content");
+  content.textContent = "";
+  const summary = document.createElement("div");
+  summary.className = "weather-summary";
+  summary.textContent = weatherDescription(d.weather_code[i]);
+  content.appendChild(summary);
+  const stats = document.createElement("div"); stats.className = "weather-stats";
+  const chance = d.precipitation_probability_max && d.precipitation_probability_max[i];
+  const sunrise = d.sunrise && d.sunrise[i] ? d.sunrise[i].slice(11,16) : "—";
+  const sunset = d.sunset && d.sunset[i] ? d.sunset[i].slice(11,16) : "—";
+  const values = [
+    ["🌡️ High / Low", Math.round(d.temperature_2m_max[i]) + "° / " + Math.round(d.temperature_2m_min[i]) + "°"],
+    ["💧 Precipitation chance", Number.isFinite(chance) ? Math.round(chance) + "%" : "—"],
+    ["🌧️ Total precipitation", Number.isFinite(d.precipitation_sum[i]) ? d.precipitation_sum[i].toFixed(1) + " mm" : "—"],
+    ["🌅 Sunrise", sunrise], ["🌇 Sunset", sunset]
+  ];
+  values.forEach(function(pair){
+    const el=document.createElement("div"); el.className="weather-stat";
+    const label=document.createElement("div");label.textContent=pair[0];
+    const val=document.createElement("strong");val.textContent=pair[1];
+    el.appendChild(label);el.appendChild(val);stats.appendChild(el);
+  });
+  content.appendChild(stats);
+  const heading=document.createElement("div");heading.className="hourly-heading";heading.textContent="Hourly outlook";content.appendChild(heading);
+  const hours=document.createElement("div");hours.className="hourly-grid";
+  const h=detailedWeather.hourly;
+  if(h && h.time){
+    h.time.forEach(function(timestamp,j){
+      if(timestamp.slice(0,10)!==date || j%2!==0) return;
+      const el=document.createElement("div");el.className="hourly-cell";
+      const hour=timestamp.slice(11,13);
+      const display=((Number(hour)+11)%12+1)+(Number(hour)<12?" AM":" PM");
+      const wind=h.wind_speed_10m[j];
+      el.textContent=display;
+      const icon=document.createElement("div");icon.style.fontSize="23px";icon.textContent=weatherEmoji(h.weather_code[j]);el.appendChild(icon);
+      const temp=document.createElement("b");temp.textContent=Math.round(h.temperature_2m[j])+"°";el.appendChild(temp);
+      const precip=document.createElement("div");precip.textContent="💧 "+Math.round(h.precipitation_probability[j])+"%";el.appendChild(precip);
+      const w=document.createElement("div");w.textContent="💨 "+Math.round(wind)+" km/h";el.appendChild(w);
+      hours.appendChild(el);
+    });
+  }
+  content.appendChild(hours);
+  document.getElementById("weather-overlay").hidden=false;
+  document.getElementById("weather-close").focus();
+}
+function closeWeatherDetail(){document.getElementById("weather-overlay").hidden=true;}
+document.getElementById("weather-close").addEventListener("click",closeWeatherDetail);
+document.getElementById("weather-overlay").addEventListener("click",function(e){if(e.target===this)closeWeatherDetail();});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeWeatherDetail();});
 
 function weatherDescription(code) {
   if (code === 0) return "Clear sky";
