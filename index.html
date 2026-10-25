@@ -346,6 +346,21 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 #family-calendar .calendar-event-icon {grid-column:2!important;grid-row:1!important;font-size:clamp(22px,3.3vh,34px)!important;flex:initial!important;}
 #family-calendar .calendar-event-detail strong {grid-column:3!important;grid-row:1!important;font-size:clamp(13px,1.55vw,19px)!important;line-height:1.2!important;}
 
+
+/* Day-by-day calendar with touch navigation */
+.calendar-header {display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.calendar-header h2 {margin:0}
+.calendar-nav {display:flex;align-items:center;gap:5px}
+.calendar-nav button {border:1px solid #b8d9ed;background:#f0faff;color:#183b5b;border-radius:10px;min-width:34px;height:32px;font-size:23px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.calendar-nav #calendar-today {font-size:12px;padding:0 8px}
+#calendar-selected-day {font-size:clamp(11px,1.35vw,17px);font-weight:800;min-width:86px;text-align:center;color:#173c5b}
+#family-calendar {touch-action:pan-y}
+#family-calendar .calendar-event {grid-template-columns:clamp(75px,10vw,115px) clamp(28px,4vw,44px) minmax(0,1fr)!important}
+#family-calendar .calendar-when .event-day {display:none}
+#family-calendar .calendar-when {align-items:center!important}
+.calendar-empty {padding:18px 10px;color:#56718a;font-weight:700;text-align:left}
+@media(max-width:850px){.calendar-header h2{font-size:clamp(16px,2.4vw,23px)}.calendar-nav button{height:28px;min-width:28px}}
+
 </style>
 </head>
 <body>
@@ -364,7 +379,15 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 
   <div class="dashboard-grid">
     <section class="card agenda">
-      <h2>📅 Family calendar</h2>
+      <div class="calendar-header">
+        <h2>📅 Family calendar</h2>
+        <div class="calendar-nav" aria-label="Choose calendar day">
+          <button type="button" id="calendar-prev" aria-label="Previous day">‹</button>
+          <span id="calendar-selected-day" aria-live="polite">Today</span>
+          <button type="button" id="calendar-next" aria-label="Next day">›</button>
+          <button type="button" id="calendar-today">Today</button>
+        </div>
+      </div>
 <div id="family-calendar" role="region" aria-label="Upcoming family events"><p class="muted">Loading calendar…</p></div>
     </section>
     <section class="card countdowns">
@@ -728,29 +751,91 @@ function eventPicture(title) {
   if (/halloween/.test(t)) return "🎃";
   return "⭐";
 }
+const calendarTZ = "America/Edmonton";
+let calendarDayOffset = 0;
+let savedCalendarEvents = [];
+
+function calDayKey(date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    year:"numeric",month:"2-digit",day:"2-digit",timeZone:calendarTZ
+  }).formatToParts(date);
+  const value = type => parts.find(p=>p.type===type).value;
+  return value("year")+"-"+value("month")+"-"+value("day");
+}
+function calSelectedDate() {
+  // Noon UTC avoids DST-related midnight changes in Calgary.
+  const todayParts = new Intl.DateTimeFormat("en-US", {
+    year:"numeric",month:"numeric",day:"numeric",timeZone:calendarTZ
+  }).formatToParts(new Date());
+  const part = name => Number(todayParts.find(p => p.type === name).value);
+  const d = new Date(Date.UTC(part("year"),part("month")-1,part("day"),12));
+  d.setUTCDate(d.getUTCDate()+calendarDayOffset);
+  return d;
+}
+function calKeyForSelected() {
+  const d = calSelectedDate();
+  return [d.getUTCFullYear(),String(d.getUTCMonth()+1).padStart(2,"0"),String(d.getUTCDate()).padStart(2,"0")].join("-");
+}
 function renderCalendarEvents(events) {
+  savedCalendarEvents = events;
   const root = document.getElementById("family-calendar");
   root.innerHTML = "";
-  const now = new Date();
-  const upcoming = events.filter(e => e.end ? new Date(e.end) >= now : new Date(e.start) >= now)
-    .sort((a,b) => new Date(a.start)-new Date(b.start)).slice(0,7);
-  if (!upcoming.length) { root.textContent = "No upcoming events ✨"; return; }
-  upcoming.forEach(e => {
+  const selected = calSelectedDate();
+  const selectedKey = calKeyForSelected();
+  const label = calendarDayOffset === 0 ? "Today" :
+    selected.toLocaleDateString("en-CA",{weekday:"short",month:"short",day:"numeric",timeZone:"UTC"});
+  document.getElementById("calendar-selected-day").textContent = label;
+
+  const dayEvents = events.filter(e => {
+    if (!e.start) return false;
+    const first = calDayKey(new Date(e.start));
+    const last = e.end ? calDayKey(new Date(new Date(e.end).getTime()-1)) : first;
+    return first <= selectedKey && last >= selectedKey;
+  }).sort((a,b) => new Date(a.start)-new Date(b.start));
+
+  if (!dayEvents.length) {
+    const msg = document.createElement("p");
+    msg.className = "calendar-empty";
+    msg.textContent = "No events for this day ✨  Swipe left for the next day.";
+    root.appendChild(msg);
+    return;
+  }
+  dayEvents.slice(0,7).forEach(e => {
     const row = document.createElement("div"); row.className = "calendar-event";
-    const icon = document.createElement("span"); icon.className="calendar-event-icon"; icon.textContent=eventPicture(e.title);
+    const icon = document.createElement("span"); icon.className="calendar-event-icon"; icon.textContent=eventPicture(e.title || "Event");
     const detail=document.createElement("div"); detail.className="calendar-event-detail";
-    const name=document.createElement("strong"); name.textContent=e.title;
+    const name=document.createElement("strong"); name.textContent=e.title || "Untitled event";
     const when=document.createElement("span"); when.className="calendar-when";
     const start=new Date(e.start);
-    const day=start.toLocaleDateString("en-CA",{weekday:"short",month:"short",day:"numeric",timeZone:"America/Edmonton"});
-    const time=e.all_day ? "All day" : start.toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit",timeZone:"America/Edmonton"});
-    const dayLabel=document.createElement("span"); dayLabel.className="event-day"; dayLabel.textContent=day;
+    const time=e.all_day ? "All day" : start.toLocaleTimeString("en-CA",{hour:"numeric",minute:"2-digit",timeZone:calendarTZ});
     const timeLabel=document.createElement("span"); timeLabel.className="event-time"; timeLabel.textContent=time;
-    when.appendChild(dayLabel); when.appendChild(timeLabel);
+    when.appendChild(timeLabel);
     detail.appendChild(name);detail.appendChild(when);
     row.appendChild(icon);row.appendChild(detail);root.appendChild(row);
   });
 }
+function changeCalendarDay(delta) {
+  calendarDayOffset += delta;
+  renderCalendarEvents(savedCalendarEvents);
+}
+document.getElementById("calendar-prev").addEventListener("click",()=>changeCalendarDay(-1));
+document.getElementById("calendar-next").addEventListener("click",()=>changeCalendarDay(1));
+document.getElementById("calendar-today").addEventListener("click",()=>{
+  calendarDayOffset=0;renderCalendarEvents(savedCalendarEvents);
+});
+const calendarSwipeArea = document.querySelector(".agenda");
+let swipeStartX=0, swipeStartY=0;
+calendarSwipeArea.addEventListener("touchstart", e => {
+  if(e.touches.length!==1)return;
+  swipeStartX=e.touches[0].clientX;
+  swipeStartY=e.touches[0].clientY;
+},{passive:true});
+calendarSwipeArea.addEventListener("touchend", e => {
+  if(!e.changedTouches.length)return;
+  const dx=e.changedTouches[0].clientX-swipeStartX;
+  const dy=e.changedTouches[0].clientY-swipeStartY;
+  if(Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy)*1.4) changeCalendarDay(dx<0?1:-1);
+},{passive:true});
 async function loadCalendar() {
   try {
     const response=await fetch("calendar-events.json?refresh="+Math.floor(Date.now()/300000),{cache:"no-store"});
@@ -767,7 +852,7 @@ setInterval(loadCalendar, 5 * 60 * 1000);
 setInterval(updateClock, 30000);
 setInterval(loadWeather, 30 * 60 * 1000);
 // A midnight refresh keeps the displayed date range current.
-setInterval(function() { renderCountdowns(); renderKidsChores(); }, 60 * 1000);
+setInterval(function() { renderCountdowns(); renderKidsChores(); renderCalendarEvents(savedCalendarEvents); }, 60 * 1000);
 </script>
 
 </body>
