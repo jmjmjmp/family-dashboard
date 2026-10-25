@@ -413,6 +413,15 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 .brownie-heading .brownie-controls{gap:4px}
 .brownie-heading .brownie-controls button{min-width:32px;min-height:32px;padding:0 6px;font-size:20px;border-radius:7px}
 @media(max-width:699px){.brownie-heading .brownie-person{justify-content:space-between}}
+/* Bigger date/time and playful accents; same header footprint. */
+.family-heading.brownie-heading{position:relative;overflow:hidden;background-image:radial-gradient(circle at 8% 10%,rgba(255,220,95,.22) 0 12px,transparent 13px),radial-gradient(circle at 94% 88%,rgba(255,255,255,.16) 0 16px,transparent 17px)!important}
+.brownie-heading .header-date{flex-wrap:nowrap;min-width:0;gap:8px}
+.brownie-heading .header-date #today{font-size:clamp(15px,1.75vw,22px)!important;font-weight:850;line-height:1.05;white-space:nowrap}
+.brownie-heading .header-date #clock{font-size:clamp(17px,2vw,25px)!important;font-weight:900;line-height:1;white-space:nowrap;font-variant-numeric:tabular-nums}
+.brownie-heading .brownie-person:first-child{background:rgba(255,236,184,.92)}
+.brownie-heading .brownie-person:last-child{background:rgba(216,224,255,.92)}
+@media(max-width:480px){.brownie-heading .header-date #today{font-size:14px!important}.brownie-heading .header-date #clock{font-size:16px!important}}
+
 </style>
 </head>
 <body>
