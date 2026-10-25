@@ -373,11 +373,26 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 /* Short Pokémon celebration shown only when a chore is checked */
 .chore-celebration[hidden]{display:none!important}
 .chore-celebration{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;background:rgba(11,29,54,.36);pointer-events:none}
-.chore-celebration-card{background:#fff9db;border:5px solid #ffcc30;border-radius:26px;padding:12px 20px 16px;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.35);animation:chorePop .22s ease-out;max-width:85vw}
+.chore-celebration-card{background:#f3eaff;border:5px solid #9e70dc;border-radius:26px;padding:12px 20px 16px;text-align:center;box-shadow:0 12px 35px rgba(0,0,0,.35);animation:chorePop .22s ease-out;max-width:85vw}
 .chore-celebration-card img{display:block;width:min(220px,42vw);height:auto;margin:auto;border-radius:18px}
 .chore-celebration-card strong{display:block;color:#183c69;font-size:clamp(24px,4vw,42px);line-height:1.2}
 .chore-celebration-card span{display:block;color:#345577;font-size:clamp(14px,2vw,20px)}
 @keyframes chorePop{from{transform:scale(.65);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* Bonus missions: one compact box for both children */
+.dashboard-grid{grid-template-rows:minmax(0,1fr) minmax(0,.32fr) minmax(0,.32fr) minmax(0,.27fr)}
+.bonus-card{grid-column:1/-1;grid-row:4;background:#f6e8fffa;border-color:#9b74d4!important;display:grid;grid-template-columns:clamp(110px,16%,200px) minmax(0,1fr);align-items:center;gap:6px}
+.bonus-card h2{margin:0!important;font-size:clamp(15px,2vw,25px)}
+.bonus-players{display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0;height:100%}
+.bonus-player{display:flex;align-items:center;gap:clamp(3px,.65vw,9px);min-width:0;background:#fffafeee;border-radius:11px;padding:3px 7px}
+.bonus-player>strong{font-size:clamp(11px,1.3vw,17px);white-space:nowrap}
+.bonus-task{font-size:clamp(11px,1.3vw,17px);font-weight:800;flex:1;min-width:0;line-height:1.12}
+.bonus-roll{font-size:clamp(10px,1.1vw,14px);font-weight:800;background:#e4d3ff;border:1px solid #a68ad3;border-radius:10px;padding:7px 8px;color:#402875;white-space:nowrap;cursor:pointer}
+.bonus-check{display:flex;align-items:center;gap:4px;font-size:clamp(10px,1vw,14px);font-weight:800;white-space:nowrap}
+.bonus-check input{width:clamp(18px,2vw,25px);height:clamp(18px,2vw,25px)}
+.bonus-player.is-done{background:#ddf8df}
+@media (max-height:660px) and (orientation:landscape){.dashboard-grid{grid-template-rows:minmax(0,1fr) minmax(0,.30fr) minmax(0,.30fr) minmax(0,.23fr)}.bonus-roll{padding:3px 5px}}
+@media (orientation:portrait){.bonus-card{display:block}.bonus-players{grid-template-columns:1fr}.bonus-player{min-height:60px}}
 </style>
 </head>
 <body>
@@ -421,6 +436,23 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
       <div id="leo-chores"></div>
       <p id="leo-progress" class="small"></p>
     </section>
+    <section class="card bonus-card" aria-label="Bonus missions">
+      <h2>🎲 Bonus Missions</h2>
+      <div class="bonus-players">
+        <div class="bonus-player">
+          <strong>🔵 Ollie</strong>
+          <span id="ollie-bonus-task" class="bonus-task">Tap Surprise Me!</span>
+          <button type="button" id="ollie-bonus-roll" class="bonus-roll">🎲 Surprise Me!</button>
+          <label class="bonus-check"><input id="ollie-bonus-done" type="checkbox"> Done!</label>
+        </div>
+        <div class="bonus-player">
+          <strong>🟠 Léo</strong>
+          <span id="leo-bonus-task" class="bonus-task">Tap Surprise Me!</span>
+          <button type="button" id="leo-bonus-roll" class="bonus-roll">🎲 Surprise Me!</button>
+          <label class="bonus-check"><input id="leo-bonus-done" type="checkbox"> Done!</label>
+        </div>
+      </div>
+    </section>
   </div>
   <div class="weather-overlay" id="weather-overlay" hidden role="dialog" aria-modal="true" aria-label="Detailed daily weather forecast">
     <div class="weather-detail">
@@ -431,7 +463,7 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
   </div>
 <div id="chore-celebration" class="chore-celebration" hidden aria-live="polite">
   <div class="chore-celebration-card">
-    <img id="chore-celebration-gif" src="pokemon_good_job.gif" alt="Pikachu celebrating">
+    <img id="chore-celebration-gif" src="gengar_good_job.gif" alt="Pokémon celebrating">
     <strong id="chore-celebration-title">Great job!</strong>
     <span>⭐ You did it! ⭐</span>
   </div>
@@ -494,7 +526,9 @@ function celebrateChore(kidName){
   const gif=document.getElementById("chore-celebration-gif");
   document.getElementById("chore-celebration-title").textContent="Great job, "+kidName+"!";
   // Reload GIF so its animation starts at the first frame every time.
-  gif.src="pokemon_good_job.gif?play="+Date.now();
+  const isLeo = kidName.toLowerCase().includes("léo") || kidName.toLowerCase().includes("leo");
+  gif.src=(isLeo ? "gyarados_good_job.gif" : "gengar_good_job.gif")+"?play="+Date.now();
+  gif.alt=isLeo ? "Gyarados celebrating Léo's success" : "Gengar celebrating Ollie's success";
   layer.hidden=false;
   clearTimeout(choreCelebrationTimeout);
   choreCelebrationTimeout=setTimeout(function(){layer.hidden=true;},2200);
@@ -934,6 +968,52 @@ setInterval(updateClock, 30000);
 setInterval(loadWeather, 30 * 60 * 1000);
 // A midnight refresh keeps the displayed date range current.
 setInterval(function() { renderCountdowns(); renderKidsChores(); renderCalendarEvents(savedCalendarEvents); }, 60 * 1000);
+
+// Optional extra mission for each child. Saved separately from regular chores.
+const bonusMissionPool = [
+  "🧸 Put away 10 toys",
+  "📚 Read for 10 minutes",
+  "🧦 Match 5 pairs of socks",
+  "🧹 Sweep a small area",
+  "🧥 Hang up your jacket",
+  "👟 Organize your shoes",
+  "🧩 Finish a puzzle",
+  "🌱 Water a houseplant",
+  "🍽️ Set the dinner table",
+  "🧽 Wipe the kitchen table",
+  "🎨 Draw a picture for someone",
+  "💌 Make a thank-you card",
+  "♻️ Collect recyclables",
+  "📖 Tidy your bookshelf",
+  "🛏️ Tidy your bedroom floor"
+];
+function bonusKey(kid){return "family-bonus-v1-"+localDayKey()+"-"+kid;}
+function showBonus(kid){
+  const state=getSaved(bonusKey(kid),{});
+  document.getElementById(kid+"-bonus-task").textContent=state.task || "Tap Surprise Me!";
+  document.getElementById(kid+"-bonus-done").checked=!!state.done;
+  document.getElementById(kid+"-bonus-done").disabled=!state.task;
+  document.getElementById(kid+"-bonus-task").parentNode.classList.toggle("is-done",!!state.done);
+}
+function rollBonus(kid){
+  const state=getSaved(bonusKey(kid),{});
+  const available=bonusMissionPool.filter(function(task){return task!==state.task;});
+  const task=available[Math.floor(Math.random()*available.length)];
+  save(bonusKey(kid),{task:task,done:false});
+  showBonus(kid);
+}
+["ollie","leo"].forEach(function(kid){
+  document.getElementById(kid+"-bonus-roll").addEventListener("click",function(){rollBonus(kid);});
+  document.getElementById(kid+"-bonus-done").addEventListener("change",function(){
+    const state=getSaved(bonusKey(kid),{});
+    if(!state.task)return;
+    state.done=this.checked;
+    save(bonusKey(kid),state);
+    showBonus(kid);
+    if(state.done)celebrateChore(kid==="leo"?"Léo":"Ollie");
+  });
+  showBonus(kid);
+});
 </script>
 
 </body>
