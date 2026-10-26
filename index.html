@@ -442,6 +442,20 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 .month-event{font-size:clamp(10px,1.2vw,14px);line-height:1.25;background:#e5eefc;border-radius:5px;padding:3px 5px;margin:3px 0;overflow-wrap:anywhere}
 @media(max-width:650px){.month-grid{gap:2px}.month-cell{padding:3px;min-height:85px}.month-event{font-size:10px;padding:2px}.month-number{font-size:14px}}
  .month-special{font-size:clamp(11px,1.3vw,16px);font-weight:800;background:#fff0cb;border-radius:6px;padding:3px 5px;margin:3px 0;overflow-wrap:anywhere}.month-controls button{font-size:clamp(12px,1.4vw,17px);font-weight:750;color:#293b32;white-space:nowrap}@media(max-width:650px){.month-controls{flex-wrap:wrap}.month-controls button{padding:6px 8px}.month-special{font-size:10px}}
+
+/* Full month fits one iPad viewport, with six compact week rows. */
+#month-view-overlay{height:100dvh;height:100vh;overflow:hidden;padding:clamp(5px,1vh,12px);display:flex;flex-direction:column}
+#month-view-overlay[hidden]{display:none}
+.month-head{flex:0 0 auto;min-height:0;margin-bottom:5px;gap:5px}
+.month-head h2{font-size:clamp(19px,2.4vw,28px)}
+.month-controls{gap:4px;flex-wrap:nowrap}
+.month-controls button{min-height:30px;padding:5px 8px;font-size:clamp(11px,1.3vw,15px)}
+.month-grid{flex:1;min-height:0;grid-template-rows:24px repeat(6,minmax(0,1fr));gap:3px}
+.month-weekday{padding:2px 0;font-size:12px}
+.month-cell{min-height:0;padding:3px 5px;overflow:hidden}
+.month-number{font-size:clamp(12px,1.5vw,17px);margin-bottom:1px}
+.month-special,.month-event{font-size:clamp(9px,1.04vw,12px);line-height:1.12;padding:2px 3px;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:650px){.month-head{flex-wrap:wrap}.month-grid{grid-template-rows:20px repeat(6,minmax(0,1fr))}.month-cell{min-height:0;padding:2px}.month-special,.month-event{font-size:9px}}
 </style>
 </head>
 <body>
@@ -547,6 +561,27 @@ const specialDates = [
   // Add more: { title: "Birthday", date: "2027-03-15", picture: "🎂" },
   // Or use a local image: { title: "Vacation", date: "2027-07-01", image: "images/beach.png" }
 ];
+
+
+/* Recurring Alberta holidays and observances. School breaks vary by school board. */
+function nthWeekday(y,m,weekday,n){const d=new Date(y,m-1,1);return 1+(weekday-d.getDay()+7)%7+7*(n-1)}
+function easterSunday(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k+7)%7,m=Math.floor((a+11*h+22*l)/451),p=h+l-7*m+114;return new Date(y,Math.floor(p/31)-1,p%31+1)}
+function annualSpecials(y){
+ const rows=[];const add=(m,d,title,picture,school=false)=>rows.push({date:y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0'),title,picture,school});
+ const move=(date,delta,title,picture,school=false)=>{const d=new Date(date);d.setDate(d.getDate()+delta);add(d.getMonth()+1,d.getDate(),title,picture,school)};
+ add(1,1,"New Year's Day","🎆",true);add(2,nthWeekday(y,2,1,3),"Family Day","👨‍👩‍👦",true);
+ const easter=easterSunday(y);move(easter,-2,"Good Friday","✝️",true);move(easter,0,"Easter Sunday","🐣");move(easter,1,"Easter Monday","🐰");
+ const may24=new Date(y,4,24);move(may24,-((may24.getDay()+6)%7),"Victoria Day","👑",true);
+ add(6,21,"National Indigenous Peoples Day","🪶");add(7,1,"Canada Day","🇨🇦",true);
+ add(8,nthWeekday(y,8,1,1),"Heritage Day","🏔️",true);add(9,nthWeekday(y,9,1,1),"Labour Day","🛠️",true);
+ add(9,30,"Truth and Reconciliation Day","🧡");add(10,nthWeekday(y,10,1,2),"Thanksgiving","🦃",true);
+ add(10,31,"Halloween","🎃");add(11,11,"Remembrance Day","🌺",true);
+ add(12,24,"Christmas Eve","🎅");add(12,25,"Christmas Day","🎄",true);
+ add(12,26,"Boxing Day","🎁");add(12,31,"New Year's Eve","✨");
+ add(2,14,"Valentine's Day","❤️");add(3,17,"St. Patrick's Day","☘️");
+ // Observed weekday for Christmas/New Year's and Remembrance Day varies by school calendar.
+ return rows;
+}
 
 function getSaved(key, fallback) {
   try {
@@ -1095,7 +1130,7 @@ function draw(){
  for(let i=0;i<42;i++){const day=new Date(start);day.setDate(start.getDate()+i);const k=key(day);
  const cell=document.createElement('div');cell.className='month-cell'+(day.getMonth()!==month.getMonth()?' outside':'')+(k===today?' today':'');
  const number=document.createElement('div');number.className='month-number';number.textContent=day.getDate();cell.append(number);
- (typeof specialDates!=='undefined'?specialDates:[]).filter(x=>x.date===k).forEach(x=>{const badge=document.createElement('div');badge.className='month-special';badge.textContent=(x.picture||'📅')+' '+x.title;cell.append(badge)});
+ [...annualSpecials(day.getFullYear()),...(typeof specialDates!=='undefined'?specialDates:[]).filter(x=>x.title!== 'Halloween' && x.title!=='Christmas').map(x=>({...x,date:day.getFullYear()+x.date.slice(4)}))].filter(x=>x.date===k).forEach(x=>{const badge=document.createElement('div');badge.className='month-special';badge.textContent=(x.picture||'📅')+' '+x.title;cell.append(badge)});
  events.filter(e=>{if(!e.start)return false;const a=eventKey(new Date(e.start));const b=e.end?eventKey(new Date(new Date(e.end).getTime()-1000)):a;return k>=a&&k<=b}).slice(0,5).forEach(e=>{const item=document.createElement('div');item.className='month-event';item.textContent=(e.summary||e.title||e.name||'Event');cell.append(item)});
  grid.append(cell)}
 
