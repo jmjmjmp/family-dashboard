@@ -456,6 +456,21 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 .month-number{font-size:clamp(12px,1.5vw,17px);margin-bottom:1px}
 .month-special,.month-event{font-size:clamp(9px,1.04vw,12px);line-height:1.12;padding:2px 3px;margin:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media(max-width:650px){.month-head{flex-wrap:wrap}.month-grid{grid-template-rows:20px repeat(6,minmax(0,1fr))}.month-cell{min-height:0;padding:2px}.month-special,.month-event{font-size:9px}}
+
+/* Stadium-style month calendar: responsive, one-screen layout. */
+#month-view-overlay{background:linear-gradient(180deg,#09152d,#0b2039 55%,#071626);color:#f5f8ff;padding:clamp(5px,.7vh,10px);gap:0}
+#month-view-overlay::before{content:"";display:block;flex:0 0 auto;height:clamp(90px,22vh,210px);border-radius:14px 14px 0 0;background:radial-gradient(ellipse at 50% 100%,#3d7cc588,transparent 65%),linear-gradient(90deg,#007bd366,#06142b66 48%,#7b16a766),url('gyarados_good_job.gif') left center / auto 95% no-repeat,url('gengar_good_job.gif') right center / auto 95% no-repeat,#08162f;background-blend-mode:screen,normal,normal,normal,normal,normal;border:1px solid #55729d;box-shadow:inset 0 0 35px #030917}
+#month-view-overlay .month-head{background:#10213bdc;padding:5px 10px;margin:0;border:1px solid #334a6a;min-height:42px}
+#month-view-overlay .month-head h2{color:#fff;font-weight:850;text-shadow:0 2px 8px #000}
+#month-view-overlay .month-controls button{background:#172641;border:1px solid #657499;color:#fff;border-radius:11px}
+#month-view-overlay .month-grid{background:#0b182b;border:1px solid #334a6a;border-radius:0 0 13px 13px;padding:3px;gap:3px;grid-template-rows:22px repeat(6,minmax(0,1fr))}
+#month-view-overlay .month-weekday{color:#b8c9e5;background:#14253e}
+#month-view-overlay .month-cell{background:#102238;color:#f7faff;border:1px solid #33485f;border-radius:5px}
+#month-view-overlay .month-cell.outside{opacity:.35}
+#month-view-overlay .month-cell.today{border:2px solid #2faaff;background:#064b81}
+#month-view-overlay .month-special{background:#554321;color:#fff2bd}
+#month-view-overlay .month-event{background:#263e62;color:#eef5ff}
+@media(max-height:650px){#month-view-overlay::before{height:clamp(60px,17vh,120px)}}
 </style>
 </head>
 <body>
