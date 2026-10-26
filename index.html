@@ -441,6 +441,7 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 .month-number{font-size:18px;font-weight:800;margin-bottom:5px}
 .month-event{font-size:clamp(10px,1.2vw,14px);line-height:1.25;background:#e5eefc;border-radius:5px;padding:3px 5px;margin:3px 0;overflow-wrap:anywhere}
 @media(max-width:650px){.month-grid{gap:2px}.month-cell{padding:3px;min-height:85px}.month-event{font-size:10px;padding:2px}.month-number{font-size:14px}}
+ .month-special{font-size:clamp(11px,1.3vw,16px);font-weight:800;background:#fff0cb;border-radius:6px;padding:3px 5px;margin:3px 0;overflow-wrap:anywhere}.month-controls button{font-size:clamp(12px,1.4vw,17px);font-weight:750;color:#293b32;white-space:nowrap}@media(max-width:650px){.month-controls{flex-wrap:wrap}.month-controls button{padding:6px 8px}.month-special{font-size:10px}}
 </style>
 </head>
 <body>
@@ -1075,8 +1076,8 @@ render();
 })();
 </script>
 <div id="month-view-overlay" hidden role="dialog" aria-modal="true" aria-label="Full month calendar">
-<div class="month-head"><h2 id="month-view-title">Month</h2><div class="month-controls"><button id="month-prev" aria-label="Previous month">‹</button><button id="month-current">Today</button><button id="month-next" aria-label="Next month">›</button><button id="month-close">✕ Back home</button></div></div>
-<div id="month-countdowns" class="month-countdowns"></div><div id="month-grid" class="month-grid"></div></div>
+<div class="month-head"><h2 id="month-view-title">Month</h2><div class="month-controls"><button id="month-prev" aria-label="Previous month">‹ Previous</button><button id="month-current">Today</button><button id="month-next" aria-label="Next month">Next ›</button><button id="month-close">✕ Close month view</button></div></div>
+<div id="month-grid" class="month-grid"></div></div>
 <script>
 (function(){
 const overlay=document.getElementById('month-view-overlay');
@@ -1094,10 +1095,10 @@ function draw(){
  for(let i=0;i<42;i++){const day=new Date(start);day.setDate(start.getDate()+i);const k=key(day);
  const cell=document.createElement('div');cell.className='month-cell'+(day.getMonth()!==month.getMonth()?' outside':'')+(k===today?' today':'');
  const number=document.createElement('div');number.className='month-number';number.textContent=day.getDate();cell.append(number);
+ (typeof specialDates!=='undefined'?specialDates:[]).filter(x=>x.date===k).forEach(x=>{const badge=document.createElement('div');badge.className='month-special';badge.textContent=(x.picture||'📅')+' '+x.title;cell.append(badge)});
  events.filter(e=>{if(!e.start)return false;const a=eventKey(new Date(e.start));const b=e.end?eventKey(new Date(new Date(e.end).getTime()-1000)):a;return k>=a&&k<=b}).slice(0,5).forEach(e=>{const item=document.createElement('div');item.className='month-event';item.textContent=(e.summary||e.title||e.name||'Event');cell.append(item)});
  grid.append(cell)}
- const cd=document.getElementById('month-countdowns');cd.replaceChildren();
- document.querySelectorAll('#countdown-list .countdown-row').forEach(row=>{const label=row.innerText.trim().replace(/\s+/g,' ');if(label){const span=document.createElement('span');span.textContent=label;cd.append(span)}});
+
 }
 document.getElementById('open-month-view').addEventListener('click',()=>{month=new Date();month.setDate(1);draw();overlay.hidden=false});
 document.getElementById('month-close').addEventListener('click',()=>overlay.hidden=true);
