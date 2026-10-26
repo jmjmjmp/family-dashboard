@@ -423,6 +423,25 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 @media(max-width:480px){.brownie-heading .header-date #today{font-size:14px!important}.brownie-heading .header-date #clock{font-size:16px!important}}
 
 </style>
+<style id="month-view-styles">
+#open-month-view{margin-left:8px;padding:7px 12px;border-radius:10px;font-weight:800;cursor:pointer}
+#month-view-overlay{position:fixed;inset:0;z-index:99999;background:#fff8ef;overflow:auto;padding:clamp(12px,2vw,28px);color:#293b32}
+#month-view-overlay[hidden]{display:none}
+.month-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.month-head h2{margin:0;font-size:clamp(22px,3vw,34px)}
+.month-controls{display:flex;gap:8px;align-items:center}
+.month-controls button{padding:9px 15px;border:1px solid #aaa;border-radius:10px;background:white;font-size:18px;cursor:pointer}
+.month-countdowns{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 18px}
+.month-countdowns span{background:#ffe3a3;padding:9px 14px;border-radius:12px;font-weight:700}
+.month-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.month-weekday{text-align:center;font-weight:800;padding:8px 0}
+.month-cell{min-height:clamp(90px,16vh,170px);background:white;border:1px solid #e5d9ca;border-radius:10px;padding:7px;overflow:hidden}
+.month-cell.outside{opacity:.35}
+.month-cell.today{border:3px solid #dd3d3d}
+.month-number{font-size:18px;font-weight:800;margin-bottom:5px}
+.month-event{font-size:clamp(10px,1.2vw,14px);line-height:1.25;background:#e5eefc;border-radius:5px;padding:3px 5px;margin:3px 0;overflow-wrap:anywhere}
+@media(max-width:650px){.month-grid{gap:2px}.month-cell{padding:3px;min-height:85px}.month-event{font-size:10px;padding:2px}.month-number{font-size:14px}}
+</style>
 </head>
 <body>
 <main>
@@ -438,7 +457,7 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
   <div class="dashboard-grid">
     <section class="card agenda">
       <div class="calendar-header">
-        <h2>📅 Family calendar</h2>
+        <h2>📅 Family calendar <button type="button" id="open-month-view">🗓️ Month view</button></h2>
         <div class="calendar-nav" aria-label="Choose calendar day">
           <button type="button" id="calendar-prev" aria-label="Previous day">‹</button>
           <span id="calendar-selected-day" aria-live="polite">Today</span>
@@ -1053,6 +1072,39 @@ function render(){["leo","ollie"].forEach(function(k){var count=document.getElem
 document.querySelectorAll("[data-brownie][data-change]").forEach(function(button){button.addEventListener("click",function(){var k=this.getAttribute("data-brownie");var d=Number(this.getAttribute("data-change"));points[k]=Math.max(0,points[k]+d);try{localStorage.setItem(key,JSON.stringify(points));}catch(e){}render();});});
 window.addEventListener("storage",function(e){if(e.key===key){try{var next=JSON.parse(e.newValue||"{}");["leo","ollie"].forEach(function(k){if(Number.isSafeInteger(next[k])&&next[k]>=0)points[k]=next[k];});render();}catch(err){}}});
 render();
+})();
+</script>
+<div id="month-view-overlay" hidden role="dialog" aria-modal="true" aria-label="Full month calendar">
+<div class="month-head"><h2 id="month-view-title">Month</h2><div class="month-controls"><button id="month-prev" aria-label="Previous month">‹</button><button id="month-current">Today</button><button id="month-next" aria-label="Next month">›</button><button id="month-close">✕ Back home</button></div></div>
+<div id="month-countdowns" class="month-countdowns"></div><div id="month-grid" class="month-grid"></div></div>
+<script>
+(function(){
+const overlay=document.getElementById('month-view-overlay');
+let month=new Date();month.setDate(1);
+const zone=typeof calendarTZ!=='undefined'?calendarTZ:'America/Edmonton';
+function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function eventKey(d){try{return typeof calDayKey==='function'?calDayKey(d):new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}catch(e){return key(d)}}
+function draw(){
+ document.getElementById('month-view-title').textContent=month.toLocaleDateString('en-CA',{month:'long',year:'numeric'});
+ const grid=document.getElementById('month-grid');grid.replaceChildren();
+ ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(x=>{const el=document.createElement('div');el.className='month-weekday';el.textContent=x;grid.append(el)});
+ const start=new Date(month.getFullYear(),month.getMonth(),1);start.setDate(1-start.getDay());
+ const today=eventKey(new Date());
+ const events=typeof savedCalendarEvents!=='undefined'&&Array.isArray(savedCalendarEvents)?savedCalendarEvents:[];
+ for(let i=0;i<42;i++){const day=new Date(start);day.setDate(start.getDate()+i);const k=key(day);
+ const cell=document.createElement('div');cell.className='month-cell'+(day.getMonth()!==month.getMonth()?' outside':'')+(k===today?' today':'');
+ const number=document.createElement('div');number.className='month-number';number.textContent=day.getDate();cell.append(number);
+ events.filter(e=>{if(!e.start)return false;const a=eventKey(new Date(e.start));const b=e.end?eventKey(new Date(new Date(e.end).getTime()-1000)):a;return k>=a&&k<=b}).slice(0,5).forEach(e=>{const item=document.createElement('div');item.className='month-event';item.textContent=(e.summary||e.title||e.name||'Event');cell.append(item)});
+ grid.append(cell)}
+ const cd=document.getElementById('month-countdowns');cd.replaceChildren();
+ document.querySelectorAll('#countdown-list .countdown-row').forEach(row=>{const label=row.innerText.trim().replace(/\s+/g,' ');if(label){const span=document.createElement('span');span.textContent=label;cd.append(span)}});
+}
+document.getElementById('open-month-view').addEventListener('click',()=>{month=new Date();month.setDate(1);draw();overlay.hidden=false});
+document.getElementById('month-close').addEventListener('click',()=>overlay.hidden=true);
+document.getElementById('month-prev').addEventListener('click',()=>{month.setMonth(month.getMonth()-1);draw()});
+document.getElementById('month-next').addEventListener('click',()=>{month.setMonth(month.getMonth()+1);draw()});
+document.getElementById('month-current').addEventListener('click',()=>{month=new Date();month.setDate(1);draw()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')overlay.hidden=true});
 })();
 </script>
 </body>
