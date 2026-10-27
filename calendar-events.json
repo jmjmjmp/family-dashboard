@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-10-27T00:01:31.036833+00:00",
+  "updated_at": "2026-10-27T05:26:01.254702+00:00",
   "events": [
     {
       "title": "Leo library",
@@ -20,9 +20,9 @@
       "all_day": false
     },
     {
-      "title": "Leo bus B",
-      "start": "2026-10-30T18:00:00+00:00",
-      "end": "2026-10-30T18:15:00+00:00",
+      "title": "Leo dance with Vaughn ",
+      "start": "2026-10-31T00:30:00+00:00",
+      "end": "2026-10-31T02:30:00+00:00",
       "all_day": false
     },
     {
@@ -86,15 +86,15 @@
       "all_day": false
     },
     {
-      "title": "Leo soccer",
-      "start": "2026-11-11T00:00:00-06:00",
-      "end": "2026-11-12T00:00:00-06:00",
-      "all_day": true
-    },
-    {
       "title": "No school ",
       "start": "2026-11-11T00:00:00-06:00",
       "end": "2026-11-14T00:00:00-06:00",
+      "all_day": true
+    },
+    {
+      "title": "Leo soccer",
+      "start": "2026-11-11T00:00:00-06:00",
+      "end": "2026-11-12T00:00:00-06:00",
       "all_day": true
     },
     {
