@@ -422,6 +422,7 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 .brownie-heading .brownie-person:last-child{background:rgba(216,224,255,.92)}
 @media(max-width:480px){.brownie-heading .header-date #today{font-size:14px!important}.brownie-heading .header-date #clock{font-size:16px!important}}
 
+.header-pokeball{display:inline-flex;align-items:center;justify-content:center;font-size:24px;line-height:1;flex-shrink:0;position:relative;width:26px;height:26px;border:2px solid #222;border-radius:50%;background:linear-gradient(to bottom,#e53935 0 45%,#222 45% 55%,#fff 55% 100%);color:transparent!important}.header-pokeball::after{content:"";position:absolute;width:8px;height:8px;background:white;border:2px solid #222;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%)}
 </style>
 <style id="month-view-styles">
 #open-month-view{margin-left:8px;padding:7px 12px;border-radius:10px;font-weight:800;cursor:pointer}
@@ -476,7 +477,7 @@ main{position:relative;display:flex;flex-direction:column;width:100%;height:100v
 <body>
 <main>
   <header class="topbar">
-    <div class="family-heading brownie-heading"><div class="header-date"><p id="today" class="muted">Family HQ</p><p id="clock" class="muted"></p></div>
+    <div class="family-heading brownie-heading"><div class="header-date"><p id="today" class="muted">Family HQ</p><p id="clock" class="muted"></p><span class="header-pokeball" role="img" aria-label="Pokéball" title="Pokéball">🔴</span></div>
 </div>
     <section class="forecast" aria-label="Five-day Calgary weather forecast">
       <div class="forecast-label">🌤️ Calgary <strong id="current-temp">--°</strong> · 5-day forecast</div>
