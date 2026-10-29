@@ -1,12 +1,6 @@
 {
-  "updated_at": "2026-10-29T09:39:31.772542+00:00",
+  "updated_at": "2026-10-29T16:46:30.737707+00:00",
   "events": [
-    {
-      "title": "Ollie library ",
-      "start": "2026-10-29T12:00:00+00:00",
-      "end": "2026-10-29T13:00:00+00:00",
-      "all_day": false
-    },
     {
       "title": "Ollie summit all day",
       "start": "2026-10-30T13:00:00+00:00",
@@ -143,6 +137,12 @@
       "title": "Leo soccer",
       "start": "2026-11-25T18:30:00-06:00",
       "end": "2026-11-25T19:30:00-06:00",
+      "all_day": false
+    },
+    {
+      "title": "Ollie soccer",
+      "start": "2026-11-28T16:45:00+00:00",
+      "end": "2026-11-28T17:45:00+00:00",
       "all_day": false
     }
   ]
