@@ -1,16 +1,10 @@
 {
-  "updated_at": "2026-10-30T20:01:36.572636+00:00",
+  "updated_at": "2026-10-30T23:58:02.919728+00:00",
   "events": [
     {
       "title": "Ollie summit all day",
       "start": "2026-10-30T13:00:00+00:00",
       "end": "2026-10-31T00:00:00+00:00",
-      "all_day": false
-    },
-    {
-      "title": "Alix pickup Leo for pizza",
-      "start": "2026-10-30T23:15:00+00:00",
-      "end": "2026-10-30T23:30:00+00:00",
       "all_day": false
     },
     {
