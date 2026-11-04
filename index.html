@@ -615,8 +615,9 @@ function save(key, value) {
 }
 
 function localDayKey() {
-  const d = new Date();
-  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+  const parts = new Intl.DateTimeFormat("en-US", {timeZone:"Etc/GMT+6",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
+  const value = type => parts.find(p => p.type === type).value;
+  return value("year") + "-" + value("month") + "-" + value("day");
 }
 let choreCelebrationTimeout;
 function celebrateChore(kidName){
@@ -632,7 +633,7 @@ function celebrateChore(kidName){
   choreCelebrationTimeout=setTimeout(function(){layer.hidden=true;},2200);
 }
 function choresStorageKey() { return "family-chores-v2-" + localDayKey(); }
-function isWeekday() { const day = new Date().getDay(); return day >= 1 && day <= 5; }
+function isWeekday() { const day = new Intl.DateTimeFormat("en-US",{weekday:"short",timeZone:"Etc/GMT+6"}).format(new Date()); return day !== "Sat" && day !== "Sun"; }
 function renderKidsChores() {
   const state = getSaved(choresStorageKey(), {});
   let total = 0, done = 0;
@@ -740,7 +741,7 @@ function renderCountdowns() {
 
 function updateClock() {
   const now = new Date();
-  const calgaryTimeZone = "America/Edmonton";
+  const calgaryTimeZone = "Etc/GMT+6"; // Alberta Time (ABT): fixed UTC-6
   document.getElementById("today").textContent =
     now.toLocaleDateString("en-CA", {
       weekday: "long", month: "long", day: "numeric",
@@ -967,7 +968,7 @@ function eventPicture(title) {
   if (/halloween/.test(t)) return "🎃";
   return "⭐";
 }
-const calendarTZ = "America/Edmonton";
+const calendarTZ = "Etc/GMT+6"; // ABT, independent of outdated device time-zone data
 let calendarDayOffset = 0;
 let savedCalendarEvents = [];
 
@@ -1136,7 +1137,7 @@ render();
 (function(){
 const overlay=document.getElementById('month-view-overlay');
 let month=new Date();month.setDate(1);
-const zone=typeof calendarTZ!=='undefined'?calendarTZ:'America/Edmonton';
+const zone=typeof calendarTZ!=='undefined'?calendarTZ:'Etc/GMT+6';
 function key(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function eventKey(d){try{return typeof calDayKey==='function'?calDayKey(d):new Intl.DateTimeFormat('en-CA',{timeZone:zone,year:'numeric',month:'2-digit',day:'2-digit'}).format(d)}catch(e){return key(d)}}
 function draw(){
