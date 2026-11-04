@@ -740,13 +740,16 @@ function renderCountdowns() {
 
 function updateClock() {
   const now = new Date();
+  const calgaryTimeZone = "America/Edmonton";
   document.getElementById("today").textContent =
-    now.toLocaleDateString(undefined, {
-      weekday: "long", month: "long", day: "numeric"
+    now.toLocaleDateString("en-CA", {
+      weekday: "long", month: "long", day: "numeric",
+      timeZone: calgaryTimeZone
     });
   document.getElementById("clock").textContent =
-    now.toLocaleTimeString(undefined, {
-      hour: "numeric", minute: "2-digit"
+    now.toLocaleTimeString("en-CA", {
+      hour: "numeric", minute: "2-digit",
+      timeZone: calgaryTimeZone
     });
 }
 
