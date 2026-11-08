@@ -1,17 +1,11 @@
 {
-  "updated_at": "2026-11-08T12:06:26.799384+00:00",
+  "updated_at": "2026-11-08T18:01:27.116325+00:00",
   "events": [
     {
       "title": "Grandma",
       "start": "2026-11-06T00:00:00-06:00",
       "end": "2026-11-12T00:00:00-06:00",
       "all_day": true
-    },
-    {
-      "title": "C4 banquet",
-      "start": "2026-11-08T16:00:00+00:00",
-      "end": "2026-11-08T18:00:00+00:00",
-      "all_day": false
     },
     {
       "title": "Belles birthday",
