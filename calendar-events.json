@@ -1,17 +1,11 @@
 {
-  "updated_at": "2026-11-08T22:22:04.263172+00:00",
+  "updated_at": "2026-11-09T01:51:07.902606+00:00",
   "events": [
     {
       "title": "Grandma",
       "start": "2026-11-06T00:00:00-06:00",
       "end": "2026-11-12T00:00:00-06:00",
       "all_day": true
-    },
-    {
-      "title": "Belles birthday",
-      "start": "2026-11-08T20:00:00+00:00",
-      "end": "2026-11-08T23:00:00+00:00",
-      "all_day": false
     },
     {
       "title": "Leo soccer",
