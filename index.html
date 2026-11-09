@@ -650,7 +650,7 @@ function renderKidsChores() {
     let kidTotal=0,kidDone=0;
     choreTasks.forEach(originalTask => {
       const task = (kid.id === "leo" && originalTask.id === "bed")
-        ? { id: "chinups", title: "Do 15 chin-ups", image: "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="72" text-anchor="middle" font-size="68">💪</text></svg>') }
+        ? { id: "chinups", title: "Do 15 chin-ups", image: "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="14" fill="#dff2ff"/><path d="M8 18H92" stroke="#34465d" stroke-width="7" stroke-linecap="round"/><path d="M34 19L39 40M66 19L61 40" stroke="#e9aa76" stroke-width="7" stroke-linecap="round"/><circle cx="50" cy="40" r="12" fill="#f5c28e"/><path d="M39 37Q42 22 53 27Q63 29 62 38Q53 31 39 37" fill="#6a402d"/><circle cx="46" cy="41" r="1.5" fill="#333"/><circle cx="54" cy="41" r="1.5" fill="#333"/><path d="M46 46Q50 49 54 46" stroke="#a45e4d" fill="none" stroke-width="1.5"/><path d="M40 55Q50 51 60 55L62 76H38Z" fill="#f18b35"/><path d="M42 76L38 92M58 76L62 92" stroke="#315a92" stroke-width="8" stroke-linecap="round"/><path d="M36 18L30 18M64 18L70 18" stroke="#e9aa76" stroke-width="7" stroke-linecap="round"/></svg>') }
         : originalTask;
       const enabled = !task.weekdaysOnly || isWeekday();
       const key = kid.id + ":" + task.id;
