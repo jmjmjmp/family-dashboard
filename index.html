@@ -932,7 +932,42 @@ function openWeatherDetail(i) {
       const p=points.find(q=>q.hour===hour);
       if(p)el("text",{x:x(hour),y:32,"text-anchor":"middle","font-size":"24",fill:"#e0e5ed"},weatherEmoji(p.code));
     });
+    // Touch-friendly hourly inspection: tap or slide anywhere across the plot.
+    const guide=el("line",{x1:0,y1:T,x2:0,y2:H-B,stroke:"#fff","stroke-width":"2","stroke-dasharray":"5 5",visibility:"hidden","pointer-events":"none"});
+    const marker=el("circle",{cx:0,cy:0,r:"9",fill:"#fff",stroke:"#087cbd","stroke-width":"4",visibility:"hidden","pointer-events":"none"});
+    const bubble=el("rect",{x:0,y:62,width:158,height:48,rx:12,fill:"#fff",stroke:"#087cbd","stroke-width":"2",visibility:"hidden","pointer-events":"none"});
+    const label=el("text",{x:0,y:93,"text-anchor":"middle",fill:"#182b3b","font-size":"21","font-weight":"bold",visibility:"hidden","pointer-events":"none"},"");
+    const hint=document.createElement("div");
+    hint.textContent="Tap or slide along the chart to see the temperature and time.";
+    hint.style.cssText="text-align:center;font-size:14px;margin:5px 0;color:#4c5964";
+    function showHour(hour){
+      const p=points.reduce((best,item)=>Math.abs(item.hour-hour)<Math.abs(best.hour-hour)?item:best,points[0]);
+      const px=x(p.hour),py=y(p.temp);
+      guide.setAttribute("x1",px);guide.setAttribute("x2",px);guide.setAttribute("visibility","visible");
+      marker.setAttribute("cx",px);marker.setAttribute("cy",py);marker.setAttribute("visibility","visible");
+      const bx=Math.max(2,Math.min(W-160,px-79));
+      bubble.setAttribute("x",bx);bubble.setAttribute("visibility","visible");
+      label.setAttribute("x",bx+79);
+      label.textContent=(p.hour%12||12)+(p.hour<12?" AM":" PM")+" · "+Math.round(p.temp)+"°C";
+      label.setAttribute("visibility","visible");
+    }
+    function selectAt(clientX){
+      const rect=svg.getBoundingClientRect();
+      if(!rect.width)return;
+      const viewX=(clientX-rect.left)/rect.width*W;
+      const hour=Math.max(0,Math.min(23,(viewX-L)/(W-L-R)*23));
+      showHour(hour);
+    }
+    svg.style.cursor="crosshair";
+    svg.style.touchAction="pan-y";
+    svg.addEventListener("pointerdown",function(e){selectAt(e.clientX);});
+    svg.addEventListener("pointermove",function(e){
+      if(e.pointerType==="mouse" || e.buttons)selectAt(e.clientX);
+    });
+    svg.addEventListener("click",function(e){selectAt(e.clientX);});
+    svg.setAttribute("aria-label","Hourly temperature chart for "+readable+". Tap or slide to inspect each hour.");
     content.appendChild(svg);
+    content.appendChild(hint);
   }else{
     const msg=document.createElement("p");
     msg.textContent="Hourly temperatures are unavailable for this day.";
