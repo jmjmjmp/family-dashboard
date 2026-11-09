@@ -648,7 +648,10 @@ function renderKidsChores() {
     heading.append(name,score);panel.appendChild(heading);
     const grid = document.createElement("div"); grid.className = "task-grid";
     let kidTotal=0,kidDone=0;
-    choreTasks.forEach(task => {
+    choreTasks.forEach(originalTask => {
+      const task = (kid.id === "leo" && originalTask.id === "bed")
+        ? { id: "chinups", title: "Do 15 chin-ups", image: "data:image/svg+xml," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="72" text-anchor="middle" font-size="68">💪</text></svg>') }
+        : originalTask;
       const enabled = !task.weekdaysOnly || isWeekday();
       const key = kid.id + ":" + task.id;
       const checked = !!state[key] && enabled;
